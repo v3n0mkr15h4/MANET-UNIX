@@ -21,7 +21,6 @@ MANET-single node/
 ### 1. Start the C Application (SDR)
 ```bash
 cd c_application
-make
 ./sdr
 ```
 
