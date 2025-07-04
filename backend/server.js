@@ -80,17 +80,29 @@ app.post('/api/call', async (req, res) => {
 app.post('/api/call/stop', async (req, res) => {
     try {
         console.log('Stopping call...');
-        callClient.stopCall();
         
-        // Give a moment for cleanup
-        setTimeout(() => {
-            const status = callClient.getStatus();
-            res.json({ 
+        // Check if there's actually a call to stop
+        const status = callClient.getStatus();
+        if (!status.isStreaming) {
+            return res.json({ 
                 success: true, 
-                message: 'Call stopped',
+                message: 'No active call to stop',
                 status: status
             });
-        }, 100);
+        }
+        
+        // Stop the call and wait for cleanup
+        await callClient.stopCall();
+        
+        // Verify the call is stopped
+        const finalStatus = callClient.getStatus();
+        console.log('Call stopped, final status:', finalStatus);
+        
+        res.json({ 
+            success: true, 
+            message: 'Call stopped successfully',
+            status: finalStatus
+        });
     } catch (error) {
         console.error('Error stopping call:', error.message);
         res.status(500).json({ error: 'Failed to stop call: ' + error.message });

@@ -12,47 +12,48 @@ class CallClient {
 
     // Start streaming audio frames
     startCall(destinationSdrId) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             if (this.isStreaming) {
                 console.log('Call already in progress, cannot start new call');
                 return reject(new Error('Call already in progress'));
             }
 
-            // Ensure clean state before starting
-            this.stopCall();
+            // Ensure clean state before starting - wait for any existing cleanup
+            console.log('Ensuring clean state before starting new call...');
+            await this.stopCall();
+            
+            // Additional wait to ensure socket is fully closed
+            await new Promise(resolve => setTimeout(resolve, 200));
 
             this.currentSdrId = destinationSdrId;
             console.log(`Attempting to connect to call server for SDR ID ${destinationSdrId}`);
             
-            // Add a small delay to ensure the C server is ready for new connections
-            setTimeout(() => {
-                this.client = net.createConnection(CALL_SOCKET_PATH, () => {
-                    console.log('Connected to call server');
-                    this.isStreaming = true;
-                    
-                    // Start streaming dummy audio frames
-                    this.streamAudioFrames();
-                    resolve();
-                });
+            this.client = net.createConnection(CALL_SOCKET_PATH, () => {
+                console.log('Connected to call server');
+                this.isStreaming = true;
+                
+                // Start streaming dummy audio frames
+                this.streamAudioFrames();
+                resolve();
+            });
 
-                this.client.on('end', () => {
-                    console.log('Call server disconnected');
-                    this.stopCall();
-                });
+            this.client.on('end', () => {
+                console.log('Call server disconnected');
+                this.stopCall();
+            });
 
-                this.client.on('error', (err) => {
-                    console.error('Call client error:', err.message);
-                    this.stopCall();
-                    reject(err);
-                });
+            this.client.on('error', (err) => {
+                console.error('Call client error:', err.message);
+                this.stopCall();
+                reject(err);
+            });
 
-                // Add timeout for connection
-                this.client.setTimeout(5000, () => {
-                    console.error('Connection timeout');
-                    this.stopCall();
-                    reject(new Error('Connection timeout'));
-                });
-            }, 100); // Small delay to ensure C server is ready
+            // Add timeout for connection
+            this.client.setTimeout(10000, () => {
+                console.error('Connection timeout');
+                this.stopCall();
+                reject(new Error('Connection timeout'));
+            });
         });
     }
 
@@ -125,13 +126,21 @@ class CallClient {
             this.client.removeAllListeners(); // Remove event listeners to prevent callbacks
             
             // Try graceful close first
-            this.client.end();
+            try {
+                this.client.end();
+            } catch (err) {
+                console.log('Error during graceful close:', err.message);
+            }
             
             // Force close after a short delay
             setTimeout(() => {
                 if (this.client) {
-                    this.client.destroy();
-                    console.log('Client socket destroyed');
+                    try {
+                        this.client.destroy();
+                        console.log('Client socket destroyed');
+                    } catch (err) {
+                        console.log('Error during socket destroy:', err.message);
+                    }
                 }
             }, 50);
             
@@ -143,6 +152,14 @@ class CallClient {
         this.currentSdrId = 0;
         
         console.log(`Call stopped successfully (was connected to SDR ID ${oldSdrId})`);
+        
+        // Return a promise that resolves after cleanup is complete
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                console.log('Call cleanup completed');
+                resolve();
+            }, 100);
+        });
     }
 
     // Get current call status

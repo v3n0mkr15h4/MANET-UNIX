@@ -478,7 +478,7 @@
 
         .backspace-button {
             position: absolute;
-            right: 40px;
+            right: 8px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
@@ -948,7 +948,7 @@
                             <div class="number-display">
                                 <div class="number-input-container">
                                     <input type="number" id="dialedNumber" class="dialed-number" placeholder="Enter SDR ID (0-127)" min="0" max="127" maxlength="3" oninput="validateAndUpdateCallButton(this)">
-                                    <button id="backspaceButton" class="backspace-button" onclick="backspaceNumber()" style="display: none;">
+                                    <button id="backspaceButton" class="backspace-button" onclick="backspaceNumber()">
                                         <svg class="backspace-icon" viewBox="0 0 24 24">
                                             <path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z"/>
                                         </svg>
@@ -1319,16 +1319,10 @@
             }
         }
         
-        // Toggle backspace button visibility
+        // Toggle backspace button visibility (now always visible)
         function toggleBackspaceButton() {
-            const dialedNumber = document.getElementById('dialedNumber');
-            const backspaceButton = document.getElementById('backspaceButton');
-            
-            if (dialedNumber.value.length > 0) {
-                backspaceButton.style.display = 'flex';
-            } else {
-                backspaceButton.style.display = 'none';
-            }
+            // Backspace button is now always visible, no need to toggle
+            // This function is kept for compatibility but does nothing
         }
         
         // Update call button state
@@ -1380,6 +1374,7 @@
                 // Update socket status to connecting
                 updateSocketStatus(true);
                 
+                console.log('Initiating call to SDR ID:', dialedNumber);
                 const response = await fetch('/api/call', {
                     method: 'POST',
                     headers: {
@@ -1389,6 +1384,7 @@
                 });
                 
                 const result = await response.json();
+                console.log('Call response:', result);
                 
                 if (response.ok) {
                     // Call started successfully
@@ -1439,6 +1435,16 @@
             // Update audio status text to show active signal
             document.getElementById('audioStatusText').textContent = 'Audio Signal active';
             
+            // Reset and enable the End Call button
+            const endCallButton = document.getElementById('endCallButton');
+            endCallButton.disabled = false;
+            endCallButton.innerHTML = `
+                <svg class="control-icon" viewBox="0 0 24 24">
+                    <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.7l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+                </svg>
+                End Call
+            `;
+            
             // Start duration timer
             startDurationTimer();
             
@@ -1471,6 +1477,18 @@
             
             // Reset mute button
             resetMuteButton();
+            
+            // Reset End Call button to ensure it's enabled for next call
+            const endCallButton = document.getElementById('endCallButton');
+            if (endCallButton) {
+                endCallButton.disabled = false;
+                endCallButton.innerHTML = `
+                    <svg class="control-icon" viewBox="0 0 24 24">
+                        <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.7l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+                    </svg>
+                    End Call
+                `;
+            }
             
             // Reset audio status text
             document.getElementById('audioStatusText').textContent = 'Audio Signal active';
@@ -1533,20 +1551,20 @@
                     Ending...
                 `;
                 
+                console.log('Sending end call request...');
                 const response = await fetch('/api/call/stop', {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
                 });
                 
                 const result = await response.json();
+                console.log('End call response:', result);
                 
                 if (response.ok) {
                     console.log('Call ended successfully:', result);
                     switchToIdleState();
-                    
-                    // Wait a moment to ensure backend state is reset
-                    setTimeout(() => {
-                        console.log('Call state should be fully reset now');
-                    }, 200);
                 } else {
                     throw new Error(result.error || 'Failed to end call');
                 }
