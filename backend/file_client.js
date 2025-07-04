@@ -22,6 +22,17 @@ class FileClient {
                 console.error('File client error:', err.message);
                 reject(err);
             });
+
+            client.on('close', () => {
+                console.log('Connection to file server closed');
+            });
+
+            // Set a timeout for the connection
+            client.setTimeout(30000, () => {
+                console.error('File transfer timeout');
+                client.destroy();
+                reject(new Error('File transfer timeout'));
+            });
         });
     }
 
@@ -38,27 +49,17 @@ class FileClient {
         client.write(metadata);
 
         let bytesSent = 0;
+        let responseReceived = false;
+        let transferComplete = false;
 
-        fileStream.on('data', (chunk) => {
-            client.write(chunk);
-            bytesSent += chunk.length;
-            
-            // Log progress
-            const progress = ((bytesSent / fileSize) * 100).toFixed(1);
-            console.log(`File transfer progress: ${progress}% (${bytesSent}/${fileSize} bytes)`);
-        });
-
-        fileStream.on('end', () => {
-            console.log(`File transfer completed: ${originalName}`);
-            
-            // Send end-of-file marker
-            client.write('EOF\n');
-            
-            // Wait for acknowledgment from C server
-            client.on('data', (data) => {
+        // Handle server response
+        client.on('data', (data) => {
+            if (!responseReceived) {
+                responseReceived = true;
                 const response = data.toString().trim();
                 console.log('File server response:', response);
-                client.end();
+                
+                client.end(); // Properly close the connection
                 
                 if (response.includes('SUCCESS')) {
                     resolve({
@@ -69,13 +70,58 @@ class FileClient {
                 } else {
                     reject(new Error(`File transfer failed: ${response}`));
                 }
-            });
+            }
+        });
+
+        fileStream.on('data', (chunk) => {
+            if (!client.destroyed) {
+                client.write(chunk);
+                bytesSent += chunk.length;
+                
+                // Log progress every 10%
+                const progress = ((bytesSent / fileSize) * 100).toFixed(1);
+                if (bytesSent % Math.max(1, Math.floor(fileSize / 10)) < chunk.length) {
+                    console.log(`File transfer progress: ${progress}% (${bytesSent}/${fileSize} bytes)`);
+                }
+            }
+        });
+
+        fileStream.on('end', () => {
+            console.log(`File transfer data completed: ${originalName}`);
+            transferComplete = true;
+            
+            // Send end-of-file marker
+            if (!client.destroyed) {
+                client.write('EOF\n');
+                console.log('EOF marker sent');
+            }
         });
 
         fileStream.on('error', (err) => {
             console.error('File read error:', err.message);
-            client.end();
-            reject(err);
+            if (!client.destroyed) {
+                client.destroy();
+            }
+            if (!responseReceived) {
+                reject(err);
+            }
+        });
+
+        // Handle client errors during streaming
+        client.on('error', (err) => {
+            if (!responseReceived) {
+                console.error('Client error during streaming:', err.message);
+                reject(err);
+            }
+        });
+
+        // Handle connection close
+        client.on('close', () => {
+            console.log('Connection closed');
+            if (!responseReceived && transferComplete) {
+                // Connection closed without response - this shouldn't happen
+                reject(new Error('Connection closed without server response'));
+            }
         });
     }
 

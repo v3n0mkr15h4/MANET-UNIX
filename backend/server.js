@@ -203,6 +203,44 @@ app.get('/api/files', (req, res) => {
     }
 });
 
+// API endpoint to clear all uploaded files
+app.delete('/api/files/clear', (req, res) => {
+    try {
+        const uploadsDir = path.join(__dirname, '../uploads');
+        
+        if (!fs.existsSync(uploadsDir)) {
+            return res.json({
+                success: true,
+                message: 'No files to clear',
+                deletedCount: 0
+            });
+        }
+        
+        const files = fs.readdirSync(uploadsDir);
+        let deletedCount = 0;
+        
+        files.forEach(filename => {
+            const filepath = path.join(uploadsDir, filename);
+            try {
+                fs.unlinkSync(filepath);
+                deletedCount++;
+                console.log(`Deleted file: ${filename}`);
+            } catch (err) {
+                console.error(`Error deleting file ${filename}:`, err.message);
+            }
+        });
+        
+        res.json({
+            success: true,
+            message: `Successfully deleted ${deletedCount} files`,
+            deletedCount: deletedCount
+        });
+    } catch (error) {
+        console.error('Error clearing files:', error.message);
+        res.status(500).json({ error: 'Failed to clear files: ' + error.message });
+    }
+});
+
 // Serve the new MANET dashboard as the main page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/manet-dashboard.html'));

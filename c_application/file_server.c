@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -104,8 +105,19 @@ void handle_file_transfer(int client_fd) {
             break;
         }
         
-        // Check for EOF marker
-        if (strncmp(buffer, "EOF\n", 4) == 0) {
+        // Check for EOF marker in the data
+        char *eof_pos = strstr(buffer, "EOF\n");
+        if (eof_pos) {
+            // Write only the data before EOF marker
+            size_t data_before_eof = eof_pos - buffer;
+            if (data_before_eof > 0) {
+                size_t written = fwrite(buffer, 1, data_before_eof, file);
+                if (written != data_before_eof) {
+                    printf("Error writing final data to file: %s\n", strerror(errno));
+                    break;
+                }
+                bytes_received += data_before_eof;
+            }
             printf("EOF marker received\n");
             break;
         }
@@ -119,16 +131,23 @@ void handle_file_transfer(int client_fd) {
         
         bytes_received += bytes_read;
         
-        // Log progress
-        double progress = ((double)bytes_received / file_size) * 100.0;
-        printf("File transfer progress: %.1f%% (%ld/%ld bytes)\n", 
-               progress, bytes_received, file_size);
+        // Log progress every 10%
+        static long last_progress_logged = 0;
+        long current_progress = ((double)bytes_received / file_size) * 100.0;
+        if (current_progress - last_progress_logged >= 10 || bytes_received == file_size) {
+            printf("File transfer progress: %ld%% (%ld/%ld bytes)\n", 
+                   current_progress, bytes_received, file_size);
+            last_progress_logged = current_progress;
+        }
     }
     
     fclose(file);
     
+    // Small delay to ensure all data is written
+    sleep(1); // 1 second delay
+    
     if (bytes_received >= file_size) {
-        printf("File transfer completed successfully: %s\n", filename);
+        printf("File transfer completed successfully: %s (%ld bytes)\n", filename, bytes_received);
         write(client_fd, "SUCCESS: File received successfully\n", 36);
     } else {
         printf("File transfer incomplete: %ld/%ld bytes\n", bytes_received, file_size);
