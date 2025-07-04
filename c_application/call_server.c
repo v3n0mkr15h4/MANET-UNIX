@@ -111,9 +111,15 @@ int main() {
                     break;
                 }
                 
-                // For demo, assume SDR ID is sent in the first byte of payload
+                // For 128-node MANET: SDR ID is in the first byte, masked to 7 bits
                 if (frame_length > 0) {
-                    current_sdr_id = (unsigned char)buffer[2];
+                    current_sdr_id = (unsigned char)buffer[2] & 0x7F; // Mask to 0-127 range
+                    
+                    // Validate SDR ID range for 128-node network
+                    if (current_sdr_id > 127) {
+                        printf("Warning: Invalid SDR ID %d (should be 0-127)\n", current_sdr_id);
+                        current_sdr_id = 127; // Cap at maximum valid ID
+                    }
                 }
                 
                 printf("Received audio frame of length %d for SDR ID %d\n", 

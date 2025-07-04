@@ -14,6 +14,7 @@ const callClient = new CallClient();
 // Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
+app.use('/icons', express.static(path.join(__dirname, '../icons')));
 
 // API endpoint to send message
 app.post('/api/send', async (req, res) => {
@@ -37,12 +38,16 @@ app.post('/api/send', async (req, res) => {
 app.post('/api/call', async (req, res) => {
     const { destinationId } = req.body;
     
-    if (!destinationId || isNaN(destinationId)) {
-        return res.status(400).json({ error: 'Valid destination ID is required' });
+    // Validate SDR ID range for 128-node network
+    const sdrId = parseInt(destinationId);
+    if (isNaN(sdrId) || sdrId < 0 || sdrId > 127) {
+        return res.status(400).json({ 
+            error: `Invalid SDR ID: ${destinationId}. Must be between 0 and 127 for this 128-node MANET.` 
+        });
     }
     
     try {
-        console.log('Starting call to SDR ID:', destinationId);
+        console.log('Starting call to SDR ID:', sdrId);
         
         // Check if already streaming
         const status = callClient.getStatus();
@@ -54,15 +59,15 @@ app.post('/api/call', async (req, res) => {
         }
         
         // Send call command to message server
-        const callResponse = await msgClient.sendCallCommand(parseInt(destinationId));
+        const callResponse = await msgClient.sendCallCommand(sdrId);
         console.log('Call command response:', callResponse);
         
         // Start audio streaming
-        await callClient.startCall(parseInt(destinationId));
+        await callClient.startCall(sdrId);
         
         res.json({ 
             success: true, 
-            message: `Call started to SDR ID ${destinationId}`,
+            message: `Call started to SDR ID ${sdrId}`,
             response: callResponse 
         });
     } catch (error) {

@@ -89,12 +89,13 @@ class CallClient {
 
     // Create dummy audio frame (simulated audio data)
     createDummyAudioFrame() {
-        // First byte is the SDR ID, followed by dummy audio data
+        // Optimized for 128-node network (SDR IDs 0-127)
         const frameSize = 64; // Small frame for demo
         const audioFrame = Buffer.alloc(frameSize);
         
-        // Set SDR ID in first byte
-        audioFrame[0] = this.currentSdrId;
+        // Set SDR ID in first byte (7 bits used, 1 bit available for future use)
+        // Mask to ensure SDR ID is within 0-127 range
+        audioFrame[0] = this.currentSdrId & 0x7F; // Use only 7 bits (0-127)
         
         // Fill with dummy audio data (sine wave pattern)
         for (let i = 1; i < frameSize; i++) {

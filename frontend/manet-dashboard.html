@@ -434,6 +434,18 @@
             box-shadow: 0 0 0 2px rgba(255, 140, 66, 0.2);
         }
 
+        /* Remove number input arrows */
+        .dialed-number::-webkit-outer-spin-button,
+        .dialed-number::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .dialed-number[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
         /* Number Input Container */
         .number-input-container {
             position: relative;
@@ -462,6 +474,34 @@
         .clear-number-btn:hover {
             background: #f8f9fa;
             color: #ff8c42;
+        }
+
+        .backspace-button {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            color: #6c757d;
+        }
+
+        .backspace-button:hover {
+            background: #f8f9fa;
+            color: #ff8c42;
+        }
+
+        .backspace-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
         }
 
         .clear-icon {
@@ -888,7 +928,7 @@
                 <!-- Call Tab -->
                 <div id="call" class="tab-pane">
                     <h2>Voice Call Application</h2>
-                    <p>Voice communication system with numeric keypad for initiating calls to specific SDR nodes in the network.</p>
+                    <p>Voice communication system for 128-node MANET. Enter SDR ID (0-127) to initiate calls to specific nodes in the network.</p>
                     
                     <!-- Call Interface -->
                     <div class="call-interface">
@@ -907,10 +947,10 @@
                             <!-- Number Display -->
                             <div class="number-display">
                                 <div class="number-input-container">
-                                    <input type="text" id="dialedNumber" class="dialed-number" placeholder="Enter SDR ID" maxlength="3" oninput="updateCallButton()">
-                                    <button class="clear-number-btn" onclick="clearNumber()" style="display: none;">
-                                        <svg class="clear-icon" viewBox="0 0 24 24">
-                                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                    <input type="number" id="dialedNumber" class="dialed-number" placeholder="Enter SDR ID (0-127)" min="0" max="127" maxlength="3" oninput="validateAndUpdateCallButton(this)">
+                                    <button id="backspaceButton" class="backspace-button" onclick="backspaceNumber()" style="display: none;">
+                                        <svg class="backspace-icon" viewBox="0 0 24 24">
+                                            <path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z"/>
                                         </svg>
                                     </button>
                                 </div>
@@ -975,10 +1015,8 @@
 
                                 <!-- Audio Status -->
                                 <div class="audio-status active">
-                                    <svg class="audio-icon" viewBox="0 0 24 24">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#4CAF50"/>
-                                    </svg>
-                                    <span class="audio-text">Audio Signal Active</span>
+                                    <img src="/icons/connectionactive.svg" alt="Audio Active" class="audio-icon" style="fill: #4CAF50;">
+                                    <span id="audioStatusText" class="audio-text">Audio Signal active</span>
                                 </div>
 
                                 <!-- Microphone Status -->
@@ -1212,34 +1250,84 @@
             }
         });
         
-        // Add digit to dialed number
+        // Add digit to dialed number with validation
         function addDigit(digit) {
             const dialedNumber = document.getElementById('dialedNumber');
             const currentValue = dialedNumber.value;
+            const newValue = currentValue + digit;
             
-            if (currentValue.length < 3) {
-                dialedNumber.value = currentValue + digit;
+            // Check if new value would exceed 127 or be too long
+            if (newValue.length <= 3 && parseInt(newValue) <= 127) {
+                dialedNumber.value = newValue;
                 updateCallButton();
-                toggleClearButton();
+                toggleBackspaceButton();
+            } else {
+                showSdrIdError("SDR ID must be between 0-127");
             }
+        }
+        
+        // Validate SDR ID input and update call button
+        function validateAndUpdateCallButton(input) {
+            const value = parseInt(input.value);
+            
+            if (input.value !== '' && (isNaN(value) || value < 0 || value > 127)) {
+                input.value = Math.min(127, Math.max(0, value || 0));
+                showSdrIdError("SDR ID must be between 0-127");
+            }
+            
+            updateCallButton();
+            toggleBackspaceButton();
+        }
+        
+        // Show SDR ID validation error
+        function showSdrIdError(message) {
+            // Create or update error message
+            let errorDiv = document.getElementById('sdrIdError');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.id = 'sdrIdError';
+                errorDiv.style.cssText = 'color: #dc3545; font-size: 12px; margin-top: 5px; text-align: center;';
+                document.querySelector('.number-input-container').parentNode.appendChild(errorDiv);
+            }
+            
+            errorDiv.textContent = message;
+            
+            // Clear error after 3 seconds
+            setTimeout(() => {
+                if (errorDiv) {
+                    errorDiv.textContent = '';
+                }
+            }, 3000);
         }
         
         // Clear dialed number
         function clearNumber() {
             document.getElementById('dialedNumber').value = '';
             updateCallButton();
-            toggleClearButton();
+            toggleBackspaceButton();
         }
         
-        // Toggle clear button visibility
-        function toggleClearButton() {
+        // Backspace function to remove last digit
+        function backspaceNumber() {
             const dialedNumber = document.getElementById('dialedNumber');
-            const clearButton = document.querySelector('.clear-number-btn');
+            const currentValue = dialedNumber.value;
+            
+            if (currentValue.length > 0) {
+                dialedNumber.value = currentValue.slice(0, -1);
+                updateCallButton();
+                toggleBackspaceButton();
+            }
+        }
+        
+        // Toggle backspace button visibility
+        function toggleBackspaceButton() {
+            const dialedNumber = document.getElementById('dialedNumber');
+            const backspaceButton = document.getElementById('backspaceButton');
             
             if (dialedNumber.value.length > 0) {
-                clearButton.style.display = 'flex';
+                backspaceButton.style.display = 'flex';
             } else {
-                clearButton.style.display = 'none';
+                backspaceButton.style.display = 'none';
             }
         }
         
@@ -1248,8 +1336,8 @@
             const dialedNumber = document.getElementById('dialedNumber').value;
             const callButton = document.getElementById('callButton');
             
-            // Toggle clear button visibility
-            toggleClearButton();
+            // Toggle backspace button visibility
+            toggleBackspaceButton();
             
             if (dialedNumber.length > 0) {
                 callButton.disabled = false;
@@ -1348,6 +1436,9 @@
             document.getElementById('callId').textContent = currentCall.callId;
             document.getElementById('calledNumber').textContent = currentCall.number;
             
+            // Update audio status text to show active signal
+            document.getElementById('audioStatusText').textContent = 'Audio Signal active';
+            
             // Start duration timer
             startDurationTimer();
             
@@ -1380,6 +1471,9 @@
             
             // Reset mute button
             resetMuteButton();
+            
+            // Reset audio status text
+            document.getElementById('audioStatusText').textContent = 'Audio Signal active';
             
             // Update socket status
             updateSocketStatus(false);
