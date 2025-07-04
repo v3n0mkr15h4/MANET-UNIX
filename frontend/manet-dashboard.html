@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MANET Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        /* Top Navigation Bar */
+        .navbar {
+            background: linear-gradient(135deg, #ff8c42 0%, #ff7a28 100%);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(255, 140, 66, 0.3);
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .navbar-item {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .navbar-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        /* Main Card */
+        .main-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(255, 140, 66, 0.1);
+            border: 1px solid rgba(255, 140, 66, 0.2);
+            overflow: hidden;
+            margin: 0 auto;
+            max-width: 1000px;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            background: #fafbfc;
+            border-bottom: 1px solid #e9ecef;
+            padding: 0 20px;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 16px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6c757d;
+            position: relative;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .tab-button:hover {
+            color: #ff8c42;
+        }
+
+        .tab-button.active {
+            color: #ff8c42;
+            font-weight: 600;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff8c42, #ff7a28);
+            border-radius: 2px 2px 0 0;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            padding: 40px;
+            min-height: 400px;
+        }
+
+        .tab-pane {
+            display: none;
+            text-align: center;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .tab-pane h2 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .tab-pane p {
+            color: #7f8c8d;
+            font-size: 16px;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Tab Icons */
+        .tab-icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        /* Placeholder Content Styling */
+        .placeholder-content {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 60px 20px;
+            margin-top: 20px;
+        }
+
+        .placeholder-icon {
+            width: 48px;
+            height: 48px;
+            fill: #ff8c42;
+            margin-bottom: 20px;
+        }
+
+        /* Messaging Interface Styles */
+        .messaging-interface {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .message-compose {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .message-compose h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .compose-area {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #messageInput {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: #ff8c42;
+            box-shadow: 0 0 0 2px rgba(255, 140, 66, 0.2);
+        }
+
+        #sendButton {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #ff8c42 0%, #ff7a28 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        #sendButton:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .message-log {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .message-log h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .message-log-content {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            background: #fafbfc;
+        }
+
+        .no-messages {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .message-entry {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #ff8c42;
+        }
+
+        .message-entry:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-content {
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .message-timestamp {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .message-response {
+            font-size: 12px;
+            color: #28a745;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        .message-status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .message-status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message-status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message-status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Call Interface Styles */
+        .call-interface {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .call-state-container {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Status Section */
+        .call-status-section {
+            margin-bottom: 30px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .status-indicator.idle {
+            background: #f5f5f5;
+            color: #616161;
+        }
+
+        .status-indicator.connected {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Number Display */
+        .number-display {
+            margin-bottom: 30px;
+        }
+
+        .dialed-number {
+            width: 100%;
+            max-width: 200px;
+            padding: 15px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: #fafbfc;
+            font-weight: 500;
+        }
+
+        .dialed-number::placeholder {
+            font-size: 14px;
+            font-weight: 400;
+            color: #9ca3af;
+        }
+
+        .dialed-number:focus {
+            outline: none;
+            border-color: #ff8c42;
+            box-shadow: 0 0 0 2px rgba(255, 140, 66, 0.2);
+        }
+
+        /* Number Input Container */
+        .number-input-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .clear-number-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            color: #6c757d;
+        }
+
+        .clear-number-btn:hover {
+            background: #f8f9fa;
+            color: #ff8c42;
+        }
+
+        .clear-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* Keypad */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+            max-width: 250px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .key-button {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #e9ecef;
+            border-radius: 50%;
+            background: white;
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .key-button:hover {
+            border-color: #ff8c42;
+            background: #fff8f5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 140, 66, 0.2);
+        }
+
+        .key-button:active {
+            transform: translateY(0);
+        }
+
+        /* Call Actions */
+        .call-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .call-button {
+            background: linear-gradient(135deg, #ff8c42 0%, #ff7a28 100%);
+            color: white;
+        }
+
+        .call-button:hover:not(.disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+        }
+
+        .call-button.disabled {
+            background: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .clear-button {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #e9ecef;
+        }
+
+        .clear-button:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+        }
+
+        .button-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Call Details */
+        .call-details {
+            margin-bottom: 30px;
+        }
+
+        .call-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .call-metadata {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .call-metadata:last-child {
+            margin-bottom: 0;
+        }
+
+        .call-label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .call-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Audio Status */
+        .audio-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+
+        .audio-status.active {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .audio-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Microphone Status */
+        .mic-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .mic-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* Call Controls */
+        .call-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .control-button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .mute-button {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #e9ecef;
+        }
+
+        .mute-button:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+        }
+
+        .mute-button.muted {
+            background: #ffebee;
+            color: #c62828;
+            border-color: #ffcdd2;
+        }
+
+        .end-call-button {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+        }
+
+        .end-call-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+        }
+
+        .control-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* Socket Status */
+        .socket-status {
+            margin-top: 20px;
+        }
+
+        .socket-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .socket-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+
+        .socket-indicator.connected .socket-dot {
+            background: #28a745;
+        }
+
+        .socket-indicator.connected .socket-text {
+            color: #28a745;
+        }
+
+        /* Animations */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 15px;
+            }
+
+            .navbar-menu {
+                gap: 8px;
+            }
+
+            .navbar-item {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+
+            .tab-nav {
+                overflow-x: auto;
+                padding: 0 10px;
+            }
+
+            .tab-button {
+                padding: 12px 16px;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+            
+            .messaging-interface {
+                max-width: 100%;
+            }
+            
+            .message-compose,
+            .message-log {
+                padding: 15px;
+            }
+            
+            .compose-area {
+                flex-direction: column;
+            }
+            
+            #sendButton {
+                align-self: stretch;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">MANET Simulation</a>
+        <div class="navbar-menu">
+            <button class="navbar-item">
+                <svg class="tab-icon" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                Applications
+            </button>
+            <button class="navbar-item">
+                <svg class="tab-icon" viewBox="0 0 24 24">
+                    <path d="M12 5c-3.87 0-7 3.13-7 7h2c0-2.76 2.24-5 5-5s5 2.24 5 5h2c0-3.87-3.13-7-7-7m1 9.29c.88-.39 1.5-1.26 1.5-2.29 0-1.38-1.12-2.5-2.5-2.5S9.5 10.62 9.5 12c0 1.02.62 1.9 1.5 2.29v3.3L7.59 21 9 22.41l3-3 3 3L16.41 21 13 17.59zM12 1C5.93 1 1 5.93 1 12h2c0-4.97 4.03-9 9-9s9 4.03 9 9h2c0-6.07-4.93-11-11-11"/>
+                </svg>
+                SDR Info
+            </button>
+            <button class="navbar-item">
+                <svg class="tab-icon" viewBox="0 0 24 24">
+                    <path d="M3 17v2h6v-2zM3 5v2h10V5zm10 16v-2h8v-2h-8v-2h-2v6zM7 9v2H3v2h4v2h2V9zm14 4v-2H11v2zm-6-4h2V7h4V5h-4V3h-2z"/>
+                </svg>
+                SDR Parameters
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">MANET Applications</h1>
+            <p class="page-subtitle">Mobile Ad-hoc Network Communication Suite</p>
+        </div>
+
+        <div class="main-card">
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-button active" onclick="switchTab('messaging')">
+                    <svg class="tab-icon" viewBox="0 0 24 24">
+                        <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+                    </svg>
+                    Messaging
+                </button>
+                <button class="tab-button" onclick="switchTab('call')">
+                    <svg class="tab-icon" viewBox="0 0 24 24">
+                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    </svg>
+                    Call
+                </button>
+                <button class="tab-button" onclick="switchTab('filetransfer')">
+                    <svg class="tab-icon" viewBox="0 0 24 24">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                    </svg>
+                    File Transfer
+                </button>
+                <button class="tab-button" onclick="switchTab('video')">
+                    <svg class="tab-icon" viewBox="0 0 24 24">
+                        <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                    </svg>
+                    Video
+                </button>
+                <button class="tab-button" onclick="switchTab('mc')">
+                    <svg class="tab-icon" viewBox="0 0 24 24">
+                        <path d="M20 4H4c-1.1 0-2 .9-2 2v3h2V6h16v3h2V6c0-1.1-.9-2-2-2m0 14H4v-3H2v3c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-3h-2z"/>
+                        <path d="M14.89 7.55c-.34-.68-1.45-.68-1.79 0L10 13.76l-1.11-2.21A.988.988 0 0 0 8 11H2v2h5.38l1.72 3.45c.18.34.52.55.9.55s.72-.21.89-.55L14 10.24l1.11 2.21c.17.34.51.55.89.55h6v-2h-5.38z"/>
+                    </svg>
+                    M&C
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Messaging Tab -->
+                <div id="messaging" class="tab-pane active">
+                    <h2>Messaging Application</h2>
+                    <p>Real-time messaging system for MANET communications. Send and receive text messages across the mobile ad-hoc network.</p>
+                    
+                    <!-- Messaging Interface -->
+                    <div class="messaging-interface">
+                        <!-- Message Composition -->
+                        <div class="message-compose">
+                            <h3>Compose Message</h3>
+                            <div class="compose-area">
+                                <textarea id="messageInput" placeholder="Type your message here..." rows="3"></textarea>
+                                <button id="sendButton" onclick="sendMessage()">
+                                    <svg class="button-icon" viewBox="0 0 24 24">
+                                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                                    </svg>
+                                    Send Message
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Message Log -->
+                        <div class="message-log">
+                            <h3>Message Log</h3>
+                            <div id="messageLog" class="message-log-content">
+                                <div class="no-messages">No messages sent yet</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Status Display -->
+                        <div id="messageStatus" class="message-status"></div>
+                    </div>
+                </div>
+
+                <!-- Call Tab -->
+                <div id="call" class="tab-pane">
+                    <h2>Voice Call Application</h2>
+                    <p>Voice communication system with numeric keypad for initiating calls to specific SDR nodes in the network.</p>
+                    
+                    <!-- Call Interface -->
+                    <div class="call-interface">
+                        <!-- Idle State -->
+                        <div id="callIdleState" class="call-state-container">
+                            <!-- Status Section -->
+                            <div class="call-status-section">
+                                <div class="status-indicator idle">
+                                    <svg class="status-icon" viewBox="0 0 24 24">
+                                        <path d="M15 12h2c0-2.76-2.24-5-5-5v2c1.66 0 3 1.34 3 3zm4 0h2c0-4.97-4.03-9-9-9v2c3.87 0 7 3.13 7 7zm1 3.5c-1.25 0-2.45-.2-3.57-.57-.1-.03-.21-.05-.31-.05-.26 0-.51.1-.71.29l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.59l2.2-2.21c.28-.26.36-.65.25-1C8.7 6.45 8.5 5.25 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1zM5.03 5h1.5c.07.88.22 1.75.45 2.58l-1.2 1.21c-.4-1.21-.66-2.47-.75-3.79zM19 18.97c-1.32-.09-2.6-.35-3.8-.76l1.2-1.2c.85.24 1.72.39 2.6.45v1.51z" fill="#616161"/>
+                                    </svg>
+                                    <span class="status-text">Status: Idle</span>
+                                </div>
+                            </div>
+
+                            <!-- Number Display -->
+                            <div class="number-display">
+                                <div class="number-input-container">
+                                    <input type="text" id="dialedNumber" class="dialed-number" placeholder="Enter SDR ID" maxlength="3" oninput="updateCallButton()">
+                                    <button class="clear-number-btn" onclick="clearNumber()" style="display: none;">
+                                        <svg class="clear-icon" viewBox="0 0 24 24">
+                                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Keypad -->
+                            <div class="keypad">
+                                <button class="key-button" onclick="addDigit('1')">1</button>
+                                <button class="key-button" onclick="addDigit('2')">2</button>
+                                <button class="key-button" onclick="addDigit('3')">3</button>
+                                <button class="key-button" onclick="addDigit('4')">4</button>
+                                <button class="key-button" onclick="addDigit('5')">5</button>
+                                <button class="key-button" onclick="addDigit('6')">6</button>
+                                <button class="key-button" onclick="addDigit('7')">7</button>
+                                <button class="key-button" onclick="addDigit('8')">8</button>
+                                <button class="key-button" onclick="addDigit('9')">9</button>
+                                <button class="key-button" onclick="addDigit('*')">*</button>
+                                <button class="key-button" onclick="addDigit('0')">0</button>
+                                <button class="key-button" onclick="addDigit('#')">#</button>
+                            </div>
+
+                            <!-- Call Actions -->
+                            <div class="call-actions">
+                                <button id="callButton" class="action-button call-button disabled" onclick="initiateCall()" disabled>
+                                    <svg class="button-icon" viewBox="0 0 24 24">
+                                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="#9e9e9e"/>
+                                    </svg>
+                                    Select SDR Device
+                                </button>
+                                <button class="action-button clear-button" onclick="clearNumber()">Clear</button>
+                            </div>
+                        </div>
+
+                        <!-- Connected State -->
+                        <div id="callConnectedState" class="call-state-container" style="display: none;">
+                            <!-- Status Section -->
+                            <div class="call-status-section">
+                                <div class="status-indicator connected">
+                                    <svg class="status-icon" viewBox="0 0 24 24">
+                                        <path d="M15 12h2c0-2.76-2.24-5-5-5v2c1.66 0 3 1.34 3 3zm4 0h2c0-4.97-4.03-9-9-9v2c3.87 0 7 3.13 7 7zm1 3.5c-1.25 0-2.45-.2-3.57-.57-.1-.03-.21-.05-.31-.05-.26 0-.51.1-.71.29l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.59l2.2-2.21c.28-.26.36-.65.25-1C8.7 6.45 8.5 5.25 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1zM5.03 5h1.5c.07.88.22 1.75.45 2.58l-1.2 1.21c-.4-1.21-.66-2.47-.75-3.79zM19 18.97c-1.32-.09-2.6-.35-3.8-.76l1.2-1.2c.85.24 1.72.39 2.6.45v1.51z" fill="#4CAF50"/>
+                                    </svg>
+                                    <span class="status-text">Status: Connected</span>
+                                </div>
+                            </div>
+
+                            <!-- Call Details -->
+                            <div class="call-details">
+                                <div class="call-info">
+                                    <div class="call-metadata">
+                                        <span class="call-label">Call ID:</span>
+                                        <span id="callId" class="call-value">--</span>
+                                    </div>
+                                    <div class="call-metadata">
+                                        <span class="call-label">Number:</span>
+                                        <span id="calledNumber" class="call-value">--</span>
+                                    </div>
+                                    <div class="call-metadata">
+                                        <span class="call-label">Duration:</span>
+                                        <span id="callDuration" class="call-value">00:00</span>
+                                    </div>
+                                </div>
+
+                                <!-- Audio Status -->
+                                <div class="audio-status active">
+                                    <svg class="audio-icon" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#4CAF50"/>
+                                    </svg>
+                                    <span class="audio-text">Audio Signal Active</span>
+                                </div>
+
+                                <!-- Microphone Status -->
+                                <div class="mic-status">
+                                    <svg class="mic-icon" viewBox="0 0 24 24">
+                                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                                    </svg>
+                                    <span class="mic-text">Microphone streaming...</span>
+                                </div>
+                            </div>
+
+                            <!-- Call Controls -->
+                            <div class="call-controls">
+                                <button id="muteButton" class="control-button mute-button" onclick="toggleMute()">
+                                    <svg class="control-icon" viewBox="0 0 24 24">
+                                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                                    </svg>
+                                    Mute
+                                </button>
+                                <button id="endCallButton" class="control-button end-call-button" onclick="endCall()">
+                                    <svg class="control-icon" viewBox="0 0 24 24">
+                                        <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.7l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+                                    </svg>
+                                    End Call
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Socket Status -->
+                        <div class="socket-status">
+                            <div id="socketStatus" class="socket-indicator disconnected">
+                                <span class="socket-dot"></span>
+                                <span class="socket-text">Unix Domain Socket: Disconnected</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Transfer Tab -->
+                <div id="filetransfer" class="tab-pane">
+                    <h2>File Transfer Application</h2>
+                    <p>Secure file sharing and transfer capabilities across the MANET network with progress tracking and file management.</p>
+                    <div class="placeholder-content">
+                        <svg class="placeholder-icon" viewBox="0 0 24 24">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                        </svg>
+                        <p>This is the File Transfer app interface - ready for implementation</p>
+                    </div>
+                </div>
+
+                <!-- Video Tab -->
+                <div id="video" class="tab-pane">
+                    <h2>Video Communication</h2>
+                    <p>Real-time video streaming and conferencing capabilities for visual communication across the MANET network.</p>
+                    <div class="placeholder-content">
+                        <svg class="placeholder-icon" viewBox="0 0 24 24">
+                            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                        </svg>
+                        <p>This is the Video app interface - ready for implementation</p>
+                    </div>
+                </div>
+
+                <!-- M&C Tab -->
+                <div id="mc" class="tab-pane">
+                    <h2>Monitoring & Control</h2>
+                    <p>System monitoring, network status, and control interface for managing MANET operations and diagnostics.</p>
+                    <div class="placeholder-content">
+                        <svg class="placeholder-icon" viewBox="0 0 24 24">
+                            <path d="M20 4H4c-1.1 0-2 .9-2 2v3h2V6h16v3h2V6c0-1.1-.9-2-2-2m0 14H4v-3H2v3c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-3h-2z"/>
+                            <path d="M14.89 7.55c-.34-.68-1.45-.68-1.79 0L10 13.76l-1.11-2.21A.988.988 0 0 0 8 11H2v2h5.38l1.72 3.45c.18.34.52.55.9.55s.72-.21.89-.55L14 10.24l1.11 2.21c.17.34.51.55.89.55h6v-2h-5.38z"/>
+                        </svg>
+                        <p>This is the M&C app interface - ready for implementation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global variables for messaging
+        let messageLog = [];
+        
+        // Call functionality variables
+        let currentCall = {
+            isActive: false,
+            callId: null,
+            number: null,
+            startTime: null,
+            isMuted: false,
+            durationInterval: null
+        };
+        
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab panes
+            const allPanes = document.querySelectorAll('.tab-pane');
+            allPanes.forEach(pane => pane.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            const allButtons = document.querySelectorAll('.tab-button');
+            allButtons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected tab pane
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+        
+        // Messaging functionality
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const message = messageInput.value.trim();
+            
+            if (!message) {
+                showMessageStatus('Please enter a message', 'error');
+                return;
+            }
+            
+            // Disable send button during request
+            sendButton.disabled = true;
+            sendButton.textContent = 'Sending...';
+            
+            try {
+                showMessageStatus('Sending message...', 'info');
+                
+                const response = await fetch('/api/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Add message to log
+                    addMessageToLog(message, result.response);
+                    
+                    // Clear input and show success
+                    messageInput.value = '';
+                    showMessageStatus('Message sent successfully!', 'success');
+                } else {
+                    showMessageStatus('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showMessageStatus('Network error: ' + error.message, 'error');
+            } finally {
+                // Re-enable send button
+                sendButton.disabled = false;
+                sendButton.innerHTML = `
+                    <svg class="button-icon" viewBox="0 0 24 24">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                    Send Message
+                `;
+            }
+        }
+        
+        // Add message to the log display
+        function addMessageToLog(message, response) {
+            const timestamp = new Date().toLocaleTimeString();
+            const messageEntry = {
+                content: message,
+                response: response,
+                timestamp: timestamp
+            };
+            
+            messageLog.push(messageEntry);
+            updateMessageLogDisplay();
+        }
+        
+        // Update the message log display
+        function updateMessageLogDisplay() {
+            const messageLogContent = document.getElementById('messageLog');
+            
+            if (messageLog.length === 0) {
+                messageLogContent.innerHTML = '<div class="no-messages">No messages sent yet</div>';
+                return;
+            }
+            
+            const logHTML = messageLog.map(entry => `
+                <div class="message-entry">
+                    <div class="message-content">${escapeHtml(entry.content)}</div>
+                    <div class="message-timestamp">${entry.timestamp}</div>
+                    <div class="message-response">Response: ${escapeHtml(entry.response)}</div>
+                </div>
+            `).join('');
+            
+            messageLogContent.innerHTML = logHTML;
+            
+            // Scroll to bottom
+            messageLogContent.scrollTop = messageLogContent.scrollHeight;
+        }
+        
+        // Show status message
+        function showMessageStatus(message, type) {
+            const statusDiv = document.getElementById('messageStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `message-status ${type}`;
+            
+            // Auto-clear status after 3 seconds
+            setTimeout(() => {
+                statusDiv.textContent = '';
+                statusDiv.className = 'message-status';
+            }, 3000);
+        }
+        
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Allow Enter key to send message (Ctrl+Enter for newline)
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.ctrlKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+        });
+        
+        // Add digit to dialed number
+        function addDigit(digit) {
+            const dialedNumber = document.getElementById('dialedNumber');
+            const currentValue = dialedNumber.value;
+            
+            if (currentValue.length < 3) {
+                dialedNumber.value = currentValue + digit;
+                updateCallButton();
+                toggleClearButton();
+            }
+        }
+        
+        // Clear dialed number
+        function clearNumber() {
+            document.getElementById('dialedNumber').value = '';
+            updateCallButton();
+            toggleClearButton();
+        }
+        
+        // Toggle clear button visibility
+        function toggleClearButton() {
+            const dialedNumber = document.getElementById('dialedNumber');
+            const clearButton = document.querySelector('.clear-number-btn');
+            
+            if (dialedNumber.value.length > 0) {
+                clearButton.style.display = 'flex';
+            } else {
+                clearButton.style.display = 'none';
+            }
+        }
+        
+        // Update call button state
+        function updateCallButton() {
+            const dialedNumber = document.getElementById('dialedNumber').value;
+            const callButton = document.getElementById('callButton');
+            
+            // Toggle clear button visibility
+            toggleClearButton();
+            
+            if (dialedNumber.length > 0) {
+                callButton.disabled = false;
+                callButton.classList.remove('disabled');
+                callButton.innerHTML = `
+                    <svg class="button-icon" viewBox="0 0 24 24">
+                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="white"/>
+                    </svg>
+                    Call SDR ${dialedNumber}
+                `;
+            } else {
+                callButton.disabled = true;
+                callButton.classList.add('disabled');
+                callButton.innerHTML = `
+                    <svg class="button-icon" viewBox="0 0 24 24">
+                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="#9e9e9e"/>
+                    </svg>
+                    Select SDR Device
+                `;
+            }
+        }
+        
+        // Initiate call
+        async function initiateCall() {
+            const dialedNumber = document.getElementById('dialedNumber').value;
+            if (!dialedNumber || currentCall.isActive) return;
+            
+            const callButton = document.getElementById('callButton');
+            
+            try {
+                // Update button to show calling state
+                callButton.disabled = true;
+                callButton.innerHTML = `
+                    <svg class="button-icon spinning" viewBox="0 0 24 24">
+                        <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" fill="white"/>
+                    </svg>
+                    Calling...
+                `;
+                
+                // Update socket status to connecting
+                updateSocketStatus(true);
+                
+                const response = await fetch('/api/call', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ destinationId: dialedNumber })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Call started successfully
+                    currentCall = {
+                        isActive: true,
+                        callId: generateCallId(),
+                        number: dialedNumber,
+                        startTime: new Date(),
+                        isMuted: false,
+                        durationInterval: null
+                    };
+                    
+                    switchToConnectedState();
+                } else {
+                    throw new Error(result.error || 'Failed to start call');
+                }
+            } catch (error) {
+                console.error('Call failed:', error);
+                
+                // Better error handling for different error types
+                let errorMessage = error.message;
+                if (error.message.includes('Call already in progress')) {
+                    errorMessage = 'A call is already in progress. Please end the current call first.';
+                } else if (error.message.includes('Connection timeout')) {
+                    errorMessage = 'Unable to connect to call server. Please check if the server is running.';
+                } else if (error.message.includes('Failed to start call')) {
+                    errorMessage = 'Failed to start call. Please try again.';
+                }
+                
+                alert('Failed to start call: ' + errorMessage);
+                
+                // Reset button
+                callButton.disabled = false;
+                updateCallButton();
+                updateSocketStatus(false);
+            }
+        }
+        
+        // Switch to connected state
+        function switchToConnectedState() {
+            document.getElementById('callIdleState').style.display = 'none';
+            document.getElementById('callConnectedState').style.display = 'block';
+            
+            // Update call details
+            document.getElementById('callId').textContent = currentCall.callId;
+            document.getElementById('calledNumber').textContent = currentCall.number;
+            
+            // Start duration timer
+            startDurationTimer();
+            
+            // Update socket status
+            updateSocketStatus(true);
+        }
+        
+        // Switch to idle state
+        function switchToIdleState() {
+            document.getElementById('callConnectedState').style.display = 'none';
+            document.getElementById('callIdleState').style.display = 'block';
+            
+            // Reset call state
+            currentCall = {
+                isActive: false,
+                callId: null,
+                number: null,
+                startTime: null,
+                isMuted: false,
+                durationInterval: null
+            };
+            
+            // Clear dialed number
+            clearNumber();
+            
+            // Stop duration timer
+            if (currentCall.durationInterval) {
+                clearInterval(currentCall.durationInterval);
+            }
+            
+            // Reset mute button
+            resetMuteButton();
+            
+            // Update socket status
+            updateSocketStatus(false);
+        }
+        
+        // Toggle mute
+        function toggleMute() {
+            const muteButton = document.getElementById('muteButton');
+            
+            currentCall.isMuted = !currentCall.isMuted;
+            
+            if (currentCall.isMuted) {
+                muteButton.classList.add('muted');
+                muteButton.innerHTML = `
+                    <svg class="control-icon" viewBox="0 0 24 24">
+                        <path d="M10.8 4.9c0-.66.54-1.2 1.2-1.2s1.2.54 1.2 1.2l-.01 3.91L15 10.6V5c0-1.66-1.34-3-3-3-1.54 0-2.79 1.16-2.96 2.65l1.76 1.76zM19 11h-1.7c0 .58-.1 1.13-.27 1.64l1.27 1.27c.44-.88.7-1.87.7-2.91M4.41 2.86 3 4.27l6 6V11c0 1.66 1.34 3 3 3 .23 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.55-.9l4.2 4.2 1.41-1.41z"/>
+                    </svg>
+                    Unmute
+                `;
+            } else {
+                muteButton.classList.remove('muted');
+                muteButton.innerHTML = `
+                    <svg class="control-icon" viewBox="0 0 24 24">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                    Mute
+                `;
+            }
+        }
+        
+        // Reset mute button
+        function resetMuteButton() {
+            const muteButton = document.getElementById('muteButton');
+            muteButton.classList.remove('muted');
+            muteButton.innerHTML = `
+                <svg class="control-icon" viewBox="0 0 24 24">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+                Mute
+            `;
+        }
+        
+        // End call
+        async function endCall() {
+            if (!currentCall.isActive) return;
+            
+            const endCallButton = document.getElementById('endCallButton');
+            
+            try {
+                endCallButton.disabled = true;
+                endCallButton.innerHTML = `
+                    <svg class="control-icon spinning" viewBox="0 0 24 24">
+                        <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" fill="white"/>
+                    </svg>
+                    Ending...
+                `;
+                
+                const response = await fetch('/api/call/stop', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    console.log('Call ended successfully:', result);
+                    switchToIdleState();
+                    
+                    // Wait a moment to ensure backend state is reset
+                    setTimeout(() => {
+                        console.log('Call state should be fully reset now');
+                    }, 200);
+                } else {
+                    throw new Error(result.error || 'Failed to end call');
+                }
+            } catch (error) {
+                console.error('Error ending call:', error);
+                alert('Error ending call: ' + error.message);
+                
+                // Force reset to idle state even if there was an error
+                // to prevent UI from being stuck
+                switchToIdleState();
+            }
+        }
+        
+        // Start duration timer
+        function startDurationTimer() {
+            currentCall.durationInterval = setInterval(() => {
+                if (currentCall.startTime) {
+                    const now = new Date();
+                    const duration = Math.floor((now - currentCall.startTime) / 1000);
+                    const minutes = Math.floor(duration / 60);
+                    const seconds = duration % 60;
+                    
+                    document.getElementById('callDuration').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+        
+        // Generate random call ID
+        function generateCallId() {
+            return 'CALL-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+        
+        // Update socket status
+        function updateSocketStatus(connected) {
+            const socketStatus = document.getElementById('socketStatus');
+            
+            if (connected) {
+                socketStatus.classList.remove('disconnected');
+                socketStatus.classList.add('connected');
+                socketStatus.innerHTML = `
+                    <span class="socket-dot"></span>
+                    <span class="socket-text">Unix Domain Socket: Connected</span>
+                `;
+            } else {
+                socketStatus.classList.remove('connected');
+                socketStatus.classList.add('disconnected');
+                socketStatus.innerHTML = `
+                    <span class="socket-dot"></span>
+                    <span class="socket-text">Unix Domain Socket: Disconnected</span>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

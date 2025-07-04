@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MANET Communication System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        
+        /* Message Section */
+        .message-section input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        /* Call Section */
+        .call-section {
+            text-align: center;
+        }
+        .keypad {
+            display: inline-block;
+            margin: 20px 0;
+        }
+        .keypad-row {
+            display: flex;
+            justify-content: center;
+            margin: 5px 0;
+        }
+        .keypad-button {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 5px;
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .keypad-button:hover {
+            background-color: #e9ecef;
+            border-color: #007bff;
+        }
+        .keypad-button:active {
+            transform: scale(0.95);
+        }
+        
+        .destination-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 20px 0;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .call-button {
+            background-color: #28a745;
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+        .call-button:hover {
+            background-color: #218838;
+        }
+        
+        .stop-button {
+            background-color: #dc3545;
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+        .stop-button:hover {
+            background-color: #c82333;
+        }
+        
+        .clear-button {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .clear-button:hover {
+            background-color: #e0a800;
+        }
+        
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>MANET Communication System</h1>
+    
+    <!-- Message Section -->
+    <div class="container message-section">
+        <h2>📧 Send Message</h2>
+        <div>
+            <input type="text" id="messageInput" placeholder="Enter your message here...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    
+    <!-- Call Section -->
+    <div class="container call-section">
+        <h2>📞 Make Call</h2>
+        
+        <div class="destination-display" id="destinationDisplay">
+            Enter Destination SDR ID
+        </div>
+        
+        <div class="keypad">
+            <div class="keypad-row">
+                <button class="keypad-button" onclick="appendDigit('1')">1</button>
+                <button class="keypad-button" onclick="appendDigit('2')">2</button>
+                <button class="keypad-button" onclick="appendDigit('3')">3</button>
+            </div>
+            <div class="keypad-row">
+                <button class="keypad-button" onclick="appendDigit('4')">4</button>
+                <button class="keypad-button" onclick="appendDigit('5')">5</button>
+                <button class="keypad-button" onclick="appendDigit('6')">6</button>
+            </div>
+            <div class="keypad-row">
+                <button class="keypad-button" onclick="appendDigit('7')">7</button>
+                <button class="keypad-button" onclick="appendDigit('8')">8</button>
+                <button class="keypad-button" onclick="appendDigit('9')">9</button>
+            </div>
+            <div class="keypad-row">
+                <button class="keypad-button" onclick="appendDigit('0')">0</button>
+            </div>
+        </div>
+        
+        <div>
+            <button class="call-button" onclick="startCall()" id="callButton">📞 Call</button>
+            <button class="stop-button" onclick="stopCall()" id="stopButton" disabled>🔌 Stop Call</button>
+            <button class="clear-button" onclick="clearDestination()">Clear</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div id="status"></div>
+    </div>
+
+    <script>
+        let destinationId = '';
+        let isCallActive = false;
+        
+        // Message functionality
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            console.log('Sending message:', message);
+            
+            if (!message) {
+                showStatus('Please enter a message', 'error');
+                return;
+            }
+            
+            try {
+                console.log('Making API call...');
+                const response = await fetch('/api/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                console.log('Response status:', response.status);
+                const result = await response.json();
+                console.log('Response data:', result);
+                
+                if (response.ok) {
+                    console.log('Success! Showing status...');
+                    showStatus('Message sent successfully! Response: ' + result.response, 'success');
+                    messageInput.value = '';
+                } else {
+                    console.log('Error response:', result.error);
+                    showStatus('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.log('Network error:', error);
+                showStatus('Network error: ' + error.message, 'error');
+            }
+        }
+        
+        // Call functionality
+        function appendDigit(digit) {
+            if (destinationId.length < 3) { // Limit to 3 digits
+                destinationId += digit;
+                updateDestinationDisplay();
+            }
+        }
+        
+        function clearDestination() {
+            destinationId = '';
+            updateDestinationDisplay();
+        }
+        
+        function updateDestinationDisplay() {
+            const display = document.getElementById('destinationDisplay');
+            if (destinationId === '') {
+                display.textContent = 'Enter Destination SDR ID';
+            } else {
+                display.textContent = 'SDR ID: ' + destinationId;
+            }
+        }
+        
+        async function startCall() {
+            if (!destinationId) {
+                showStatus('Please enter a destination SDR ID', 'error');
+                return;
+            }
+            
+            if (isCallActive) {
+                showStatus('Call already in progress', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('Starting call to SDR ID ' + destinationId + '...', 'info');
+                
+                const response = await fetch('/api/call', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ destinationId: parseInt(destinationId) })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    isCallActive = true;
+                    updateCallButtons();
+                    showStatus('Call started successfully to SDR ID ' + destinationId + '! Response: ' + result.response, 'success');
+                } else {
+                    showStatus('Error starting call: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Network error: ' + error.message, 'error');
+            }
+        }
+        
+        async function stopCall() {
+            if (!isCallActive) {
+                showStatus('No active call to stop', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/call/stop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    isCallActive = false;
+                    updateCallButtons();
+                    showStatus('Call stopped successfully', 'success');
+                } else {
+                    showStatus('Error stopping call: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Network error: ' + error.message, 'error');
+            }
+        }
+        
+        function updateCallButtons() {
+            const callButton = document.getElementById('callButton');
+            const stopButton = document.getElementById('stopButton');
+            
+            if (isCallActive) {
+                callButton.disabled = true;
+                stopButton.disabled = false;
+            } else {
+                callButton.disabled = false;
+                stopButton.disabled = true;
+            }
+        }
+        
+        function showStatus(message, type) {
+            console.log('showStatus called with:', message, type);
+            const statusDiv = document.getElementById('status');
+            console.log('Status div found:', statusDiv);
+            statusDiv.textContent = message;
+            statusDiv.className = type;
+            console.log('Status div updated with class:', type);
+            
+            // Auto-clear status after 5 seconds
+            setTimeout(() => {
+                statusDiv.textContent = '';
+                statusDiv.className = '';
+            }, 5000);
+        }
+        
+        // Allow Enter key to send message
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Keyboard support for keypad
+        document.addEventListener('keydown', function(e) {
+            if (e.key >= '0' && e.key <= '9') {
+                appendDigit(e.key);
+            } else if (e.key === 'Backspace') {
+                if (destinationId.length > 0) {
+                    destinationId = destinationId.slice(0, -1);
+                    updateDestinationDisplay();
+                }
+            } else if (e.key === 'Enter' && destinationId) {
+                startCall();
+            }
+        });
+    </script>
+</body>
+</html>
