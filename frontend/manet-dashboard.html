@@ -280,10 +280,41 @@
             margin-bottom: 20px;
         }
 
+        .message-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
         .message-log h3 {
             color: #2c3e50;
-            margin-bottom: 15px;
+            margin: 0;
             font-size: 18px;
+        }
+
+        .clear-log-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-log-btn:hover {
+            background: #c82333;
+        }
+
+        .clear-log-btn .btn-icon {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
         }
 
         .message-log-content {
@@ -817,6 +848,16 @@
                 align-self: stretch;
                 justify-content: center;
             }
+            
+            .message-log-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .clear-log-btn {
+                align-self: flex-end;
+            }
         }
 
         /* File Transfer Styles */
@@ -1185,7 +1226,15 @@
                         
                         <!-- Message Log -->
                         <div class="message-log">
-                            <h3>Message Log</h3>
+                            <div class="message-log-header">
+                                <h3>Message Log</h3>
+                                <button id="clearMessageLogBtn" class="clear-log-btn">
+                                    <svg class="btn-icon" viewBox="0 0 24 24">
+                                        <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                                    </svg>
+                                    Clear All
+                                </button>
+                            </div>
                             <div id="messageLog" class="message-log-content">
                                 <div class="no-messages">No messages sent yet</div>
                             </div>
@@ -1543,6 +1592,21 @@
             // Scroll to bottom
             messageLogContent.scrollTop = messageLogContent.scrollHeight;
         }
+
+        // Clear message log
+        function clearMessageLog() {
+            if (messageLog.length === 0) {
+                showMessageStatus('No messages to clear', 'info');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to clear all ${messageLog.length} messages? This action cannot be undone.`)) {
+                const clearedCount = messageLog.length;
+                messageLog = [];
+                updateMessageLogDisplay();
+                showMessageStatus(`Cleared ${clearedCount} messages`, 'success');
+            }
+        }
         
         // Show status message
         function showMessageStatus(message, type) {
@@ -1575,6 +1639,12 @@
                         sendMessage();
                     }
                 });
+            }
+
+            // Clear message log button
+            const clearMessageLogBtn = document.getElementById('clearMessageLogBtn');
+            if (clearMessageLogBtn) {
+                clearMessageLogBtn.addEventListener('click', clearMessageLog);
             }
         });
         
