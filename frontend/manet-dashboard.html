@@ -818,6 +818,244 @@
                 justify-content: center;
             }
         }
+
+        /* File Transfer Styles */
+        .file-transfer-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .upload-section,
+        .progress-section,
+        .results-section,
+        .file-list-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .upload-section h3,
+        .progress-section h3,
+        .results-section h3,
+        .file-list-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            border-color: #ff8c42;
+            background: #fff5f0;
+        }
+
+        .upload-icon {
+            width: 24px;
+            height: 24px;
+            fill: #ff8c42;
+        }
+
+        .file-input-text {
+            font-size: 16px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .file-info {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .file-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #ff8c42 0%, #ff7a28 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 140, 66, 0.4);
+        }
+
+        .upload-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .btn-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #ff8c42 0%, #ff7a28 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-weight: 500;
+            color: #495057;
+            margin: 0;
+        }
+
+        .result-message {
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .result-message.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result-message.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .refresh-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #5a6268;
+        }
+
+        .file-list {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 100px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-item-name {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 2px;
+        }
+
+        .file-item-meta {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .file-item-size {
+            font-size: 14px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .file-transfer-container {
+                padding: 0 10px;
+            }
+            
+            .upload-section,
+            .progress-section,
+            .results-section,
+            .file-list-section {
+                padding: 15px;
+            }
+            
+            .file-input-label {
+                padding: 15px;
+            }
+            
+            .upload-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1061,11 +1299,60 @@
                 <div id="filetransfer" class="tab-pane">
                     <h2>File Transfer Application</h2>
                     <p>Secure file sharing and transfer capabilities across the MANET network with progress tracking and file management.</p>
-                    <div class="placeholder-content">
-                        <svg class="placeholder-icon" viewBox="0 0 24 24">
-                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                        </svg>
-                        <p>This is the File Transfer app interface - ready for implementation</p>
+                    
+                    <div class="file-transfer-container">
+                        <!-- File Upload Section -->
+                        <div class="upload-section">
+                            <h3>Upload File</h3>
+                            <div class="file-input-wrapper">
+                                <input type="file" id="fileInput" class="file-input" accept="*/*">
+                                <label for="fileInput" class="file-input-label">
+                                    <svg class="upload-icon" viewBox="0 0 24 24">
+                                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                    </svg>
+                                    <span class="file-input-text">Choose File</span>
+                                </label>
+                            </div>
+                            <div class="file-info" id="fileInfo" style="display: none;">
+                                <p id="fileName">No file selected</p>
+                                <p id="fileSize">0 bytes</p>
+                            </div>
+                            <button id="uploadBtn" class="upload-btn" disabled>
+                                <svg class="btn-icon" viewBox="0 0 24 24">
+                                    <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                                </svg>
+                                Upload File
+                            </button>
+                        </div>
+
+                        <!-- Progress Section -->
+                        <div class="progress-section" id="progressSection" style="display: none;">
+                            <h3>Upload Progress</h3>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <p class="progress-text" id="progressText">0%</p>
+                        </div>
+
+                        <!-- Results Section -->
+                        <div class="results-section" id="resultsSection" style="display: none;">
+                            <h3>Transfer Results</h3>
+                            <div class="result-message" id="resultMessage"></div>
+                        </div>
+
+                        <!-- File List Section -->
+                        <div class="file-list-section">
+                            <h3>Uploaded Files</h3>
+                            <button id="refreshFilesBtn" class="refresh-btn">
+                                <svg class="btn-icon" viewBox="0 0 24 24">
+                                    <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+                                </svg>
+                                Refresh
+                            </button>
+                            <div class="file-list" id="fileList">
+                                <p>Loading files...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1618,6 +1905,173 @@
                 `;
             }
         }
+
+        // File Transfer Functionality
+        let selectedFile = null;
+
+        // Initialize file transfer functionality
+        function initFileTransfer() {
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const refreshFilesBtn = document.getElementById('refreshFilesBtn');
+
+            // Handle file selection
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    selectedFile = file;
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatFileSize(file.size);
+                    fileInfo.style.display = 'block';
+                    uploadBtn.disabled = false;
+                } else {
+                    selectedFile = null;
+                    fileInfo.style.display = 'none';
+                    uploadBtn.disabled = true;
+                }
+            });
+
+            // Handle file upload
+            uploadBtn.addEventListener('click', uploadFile);
+
+            // Handle refresh files
+            refreshFilesBtn.addEventListener('click', refreshFileList);
+
+            // Load initial file list
+            refreshFileList();
+        }
+
+        // Format file size for display
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Upload file to server
+        async function uploadFile() {
+            if (!selectedFile) {
+                showResult('No file selected', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const progressSection = document.getElementById('progressSection');
+            const resultsSection = document.getElementById('resultsSection');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const uploadBtn = document.getElementById('uploadBtn');
+
+            // Show progress section
+            progressSection.style.display = 'block';
+            resultsSection.style.display = 'none';
+            uploadBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // Simulate progress (since we can't get real progress from fetch)
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 10;
+                    if (progress <= 90) {
+                        progressFill.style.width = progress + '%';
+                        progressText.textContent = progress + '%';
+                    }
+                }, 100);
+
+                const result = await response.json();
+                
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+                progressText.textContent = '100%';
+
+                if (response.ok && result.success) {
+                    showResult(`File uploaded successfully: ${result.message}`, 'success');
+                    
+                    // Reset form
+                    document.getElementById('fileInput').value = '';
+                    document.getElementById('fileInfo').style.display = 'none';
+                    selectedFile = null;
+                    
+                    // Refresh file list
+                    setTimeout(refreshFileList, 1000);
+                } else {
+                    showResult(`Upload failed: ${result.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showResult(`Upload failed: ${error.message}`, 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                setTimeout(() => {
+                    progressSection.style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        // Show result message
+        function showResult(message, type) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultMessage = document.getElementById('resultMessage');
+            
+            resultMessage.textContent = message;
+            resultMessage.className = `result-message ${type}`;
+            resultsSection.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                resultsSection.style.display = 'none';
+            }, 5000);
+        }
+
+        // Refresh file list
+        async function refreshFileList() {
+            const fileList = document.getElementById('fileList');
+            
+            try {
+                fileList.innerHTML = '<p>Loading files...</p>';
+                
+                const response = await fetch('/api/files');
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    if (result.files.length === 0) {
+                        fileList.innerHTML = '<p>No files uploaded yet.</p>';
+                    } else {
+                        fileList.innerHTML = result.files.map(file => `
+                            <div class="file-item">
+                                <div class="file-item-info">
+                                    <div class="file-item-name">${file.name}</div>
+                                    <div class="file-item-meta">Modified: ${new Date(file.modified).toLocaleString()}</div>
+                                </div>
+                                <div class="file-item-size">${formatFileSize(file.size)}</div>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    fileList.innerHTML = `<p>Error loading files: ${result.error || 'Unknown error'}</p>`;
+                }
+            } catch (error) {
+                console.error('Error refreshing file list:', error);
+                fileList.innerHTML = `<p>Error loading files: ${error.message}</p>`;
+            }
+        }
+
+        // Initialize file transfer when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initFileTransfer();
+        });
     </script>
 </body>
 </html>

@@ -1,8 +1,11 @@
 const express = require('express');
+const multer = require('multer');
 const net = require('net');
 const path = require('path');
+const fs = require('fs');
 const MessageClient = require('./msg_client');
 const CallClient = require('./call_client');
+const FileClient = require('./file_client');
 
 const app = express();
 const PORT = 3000;
@@ -10,6 +13,15 @@ const PORT = 3000;
 // Create client instances
 const msgClient = new MessageClient();
 const callClient = new CallClient();
+const fileClient = new FileClient();
+
+// Configure multer for file uploads
+const upload = multer({
+    dest: '/tmp/uploads/', // temporary storage
+    limits: {
+        fileSize: 100 * 1024 * 1024 // 100MB limit
+    }
+});
 
 // Middleware
 app.use(express.json());
@@ -123,6 +135,74 @@ app.get('/api/call/status', (req, res) => {
     }
 });
 
+// API endpoint to upload and transfer files
+app.post('/api/upload', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const { originalname, path: tempPath, size } = req.file;
+        console.log(`File upload received: ${originalname} (${size} bytes)`);
+
+        // Transfer file to C server via Unix Domain Socket
+        const response = await fileClient.sendFile(tempPath, originalname);
+        
+        // Clean up temporary file
+        fs.unlink(tempPath, (err) => {
+            if (err) console.error('Error deleting temp file:', err.message);
+        });
+
+        res.json({
+            success: true,
+            message: `File ${originalname} uploaded and transferred successfully`,
+            size: size,
+            response: response
+        });
+    } catch (error) {
+        console.error('Error uploading file:', error.message);
+        
+        // Clean up temporary file on error
+        if (req.file) {
+            fs.unlink(req.file.path, (err) => {
+                if (err) console.error('Error deleting temp file:', err.message);
+            });
+        }
+        
+        res.status(500).json({ error: 'Failed to upload file: ' + error.message });
+    }
+});
+
+// API endpoint to get file transfer status
+app.get('/api/files', (req, res) => {
+    try {
+        const uploadsDir = path.join(__dirname, '../uploads');
+        
+        // Create uploads directory if it doesn't exist
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        
+        const files = fs.readdirSync(uploadsDir).map(filename => {
+            const filepath = path.join(uploadsDir, filename);
+            const stats = fs.statSync(filepath);
+            return {
+                name: filename,
+                size: stats.size,
+                modified: stats.mtime.toISOString()
+            };
+        });
+        
+        res.json({
+            success: true,
+            files: files
+        });
+    } catch (error) {
+        console.error('Error listing files:', error.message);
+        res.status(500).json({ error: 'Failed to list files: ' + error.message });
+    }
+});
+
 // Serve the new MANET dashboard as the main page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/manet-dashboard.html'));
@@ -130,7 +210,8 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Backend server running on http://localhost:${PORT}`);
-    console.log('Make sure the Message Server and Call Server are running:');
+    console.log('Make sure the servers are running:');
     console.log('  - Message Server: ./msg_server (listens on /tmp/msg_socket)');
     console.log('  - Call Server: ./call_server (listens on /tmp/call_socket)');
+    console.log('  - File Server: ./file_server (listens on /tmp/file_socket)');
 });
