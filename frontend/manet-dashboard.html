@@ -1130,6 +1130,234 @@
                 justify-content: center;
             }
         }
+
+        /* Video Streaming Styles */
+        .video-streaming-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+        }
+
+        .video-controls-section,
+        .video-preview-section,
+        .video-settings-section,
+        .video-status-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .video-controls-section h3,
+        .video-preview-section h3,
+        .video-settings-section h3,
+        .video-status-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .video-status {
+            margin-bottom: 20px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #6c757d;
+        }
+
+        .status-dot.streaming {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .status-text {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .video-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .video-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .stop-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .stop-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+
+        .video-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .video-btn .btn-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .video-preview-container {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+        }
+
+        .video-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            background: #f8f9fa;
+        }
+
+        .video-placeholder-icon {
+            width: 48px;
+            height: 48px;
+            fill: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .setting-item label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .setting-select {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .status-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .status-label {
+            font-weight: 500;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .status-value {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .video-streaming-container {
+                grid-template-columns: 1fr;
+                padding: 0 10px;
+            }
+            
+            .video-controls-section,
+            .video-preview-section,
+            .video-settings-section,
+            .video-status-section {
+                padding: 15px;
+            }
+            
+            .video-buttons {
+                flex-direction: column;
+            }
+            
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-info {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1450,11 +1678,90 @@
                 <div id="video" class="tab-pane">
                     <h2>Video Communication</h2>
                     <p>Real-time video streaming and conferencing capabilities for visual communication across the MANET network.</p>
-                    <div class="placeholder-content">
-                        <svg class="placeholder-icon" viewBox="0 0 24 24">
-                            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
-                        </svg>
-                        <p>This is the Video app interface - ready for implementation</p>
+                    
+                    <div class="video-streaming-container">
+                        <!-- Video Controls Section -->
+                        <div class="video-controls-section">
+                            <h3>Video Streaming Control</h3>
+                            <div class="video-status">
+                                <div class="status-indicator">
+                                    <span class="status-dot" id="videoStatusDot"></span>
+                                    <span class="status-text" id="videoStatusText">Status: Idle</span>
+                                </div>
+                            </div>
+                            
+                            <div class="video-buttons">
+                                <button id="startStreamBtn" class="video-btn start-btn">
+                                    <svg class="btn-icon" viewBox="0 0 24 24">
+                                        <path d="M8,5.14V19.14L19,12.14L8,5.14Z"/>
+                                    </svg>
+                                    Start Streaming
+                                </button>
+                                
+                                <button id="stopStreamBtn" class="video-btn stop-btn" disabled>
+                                    <svg class="btn-icon" viewBox="0 0 24 24">
+                                        <path d="M18,18H6V6H18V18Z"/>
+                                    </svg>
+                                    Stop Streaming
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Video Preview Section -->
+                        <div class="video-preview-section">
+                            <h3>Video Preview</h3>
+                            <div class="video-preview-container">
+                                <video id="videoPreview" class="video-preview" muted autoplay playsinline style="display: none;"></video>
+                                <div class="video-placeholder" id="videoPlaceholder">
+                                    <svg class="video-placeholder-icon" viewBox="0 0 24 24">
+                                        <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                                    </svg>
+                                    <p>Camera preview will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Video Settings Section -->
+                        <div class="video-settings-section">
+                            <h3>Streaming Settings</h3>
+                            <div class="settings-grid">
+                                <div class="setting-item">
+                                    <label for="videoQuality">Video Quality:</label>
+                                    <select id="videoQuality" class="setting-select">
+                                        <option value="480p">480p</option>
+                                        <option value="720p" selected>720p</option>
+                                        <option value="1080p">1080p</option>
+                                    </select>
+                                </div>
+                                <div class="setting-item">
+                                    <label for="frameRate">Frame Rate:</label>
+                                    <select id="frameRate" class="setting-select">
+                                        <option value="15">15 FPS</option>
+                                        <option value="30" selected>30 FPS</option>
+                                        <option value="60">60 FPS</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Video Status Section -->
+                        <div class="video-status-section">
+                            <h3>Streaming Information</h3>
+                            <div class="status-info">
+                                <div class="status-item">
+                                    <span class="status-label">Duration:</span>
+                                    <span class="status-value" id="streamDuration">--:--</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">Frames Sent:</span>
+                                    <span class="status-value" id="framesSent">0</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">VLC Status:</span>
+                                    <span class="status-value" id="vlcStatus">Stopped</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -2247,9 +2554,380 @@
             }
         }
 
+        // Video Streaming Functionality
+        let videoStream = null;
+        let isStreaming = false;
+        let streamStartTime = null;
+        let streamInterval = null;
+        let frameCount = 0;
+
+        // Initialize video streaming functionality
+        function initVideoStreaming() {
+            const startStreamBtn = document.getElementById('startStreamBtn');
+            const stopStreamBtn = document.getElementById('stopStreamBtn');
+
+            startStreamBtn.addEventListener('click', startVideoStream);
+            stopStreamBtn.addEventListener('click', stopVideoStream);
+
+            updateVideoStatus('idle');
+            
+            // Test camera availability on page load
+            testCameraAvailability();
+        }
+
+        // Test camera availability
+        async function testCameraAvailability() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    console.warn('Camera API not available');
+                    return;
+                }
+
+                // Check for available video devices
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                
+                console.log('Camera test results:', {
+                    totalDevices: devices.length,
+                    videoDevices: videoDevices.length,
+                    devices: videoDevices
+                });
+
+                if (videoDevices.length === 0) {
+                    console.warn('No camera devices found');
+                    updateVideoStatus('no-camera');
+                }
+            } catch (error) {
+                console.error('Camera test failed:', error);
+            }
+        }
+
+        // Start video streaming
+        async function startVideoStream() {
+            try {
+                console.log('Starting video stream...');
+                
+                const videoPreview = document.getElementById('videoPreview');
+                const videoPlaceholder = document.getElementById('videoPlaceholder');
+                const startBtn = document.getElementById('startStreamBtn');
+                const stopBtn = document.getElementById('stopStreamBtn');
+
+                // Check if mediaDevices API is available
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('Camera API not available. Please use a modern browser and ensure you are on HTTPS or localhost.');
+                }
+
+                // Check for available video devices
+                try {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    
+                    if (videoDevices.length === 0) {
+                        throw new Error('No camera devices found. Please connect a camera and try again.');
+                    }
+                    
+                    console.log(`Found ${videoDevices.length} video device(s):`, videoDevices);
+                } catch (enumError) {
+                    console.warn('Could not enumerate devices:', enumError);
+                    // Continue anyway, the camera might still work
+                }
+
+                // Get video quality settings
+                const quality = document.getElementById('videoQuality').value;
+                const frameRate = parseInt(document.getElementById('frameRate').value);
+
+                let constraints = {
+                    video: {
+                        frameRate: frameRate
+                    },
+                    audio: false
+                };
+
+                // Set video resolution based on quality
+                switch (quality) {
+                    case '480p':
+                        constraints.video.width = 640;
+                        constraints.video.height = 480;
+                        break;
+                    case '720p':
+                        constraints.video.width = 1280;
+                        constraints.video.height = 720;
+                        break;
+                    case '1080p':
+                        constraints.video.width = 1920;
+                        constraints.video.height = 1080;
+                        break;
+                }
+
+                console.log('Requesting camera access with constraints:', constraints);
+
+                // Request camera access with better error handling
+                try {
+                    videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (getUserMediaError) {
+                    console.error('getUserMedia error:', getUserMediaError);
+                    
+                    // Try with less restrictive constraints
+                    console.log('Trying with basic constraints...');
+                    const basicConstraints = {
+                        video: true,
+                        audio: false
+                    };
+                    
+                    try {
+                        videoStream = await navigator.mediaDevices.getUserMedia(basicConstraints);
+                        console.log('Basic constraints worked');
+                    } catch (basicError) {
+                        // Provide user-friendly error messages
+                        let errorMessage = 'Camera access failed: ';
+                        
+                        switch (basicError.name) {
+                            case 'NotFoundError':
+                                errorMessage += 'No camera device found. Please connect a camera and try again.';
+                                break;
+                            case 'NotAllowedError':
+                                errorMessage += 'Camera access denied. Please allow camera access in your browser and try again.';
+                                break;
+                            case 'NotSupportedError':
+                                errorMessage += 'Camera not supported. Please use a modern browser.';
+                                break;
+                            case 'NotReadableError':
+                                errorMessage += 'Camera is already in use by another application. Please close other applications using the camera and try again.';
+                                break;
+                            case 'OverconstrainedError':
+                                errorMessage += 'Camera settings not supported. Try different quality settings.';
+                                break;
+                            default:
+                                errorMessage += basicError.message || 'Unknown error occurred.';
+                        }
+                        
+                        throw new Error(errorMessage);
+                    }
+                }
+
+                videoPreview.srcObject = videoStream;
+                
+                // Show preview
+                videoPlaceholder.style.display = 'none';
+                videoPreview.style.display = 'block';
+
+                // Update UI
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                isStreaming = true;
+                streamStartTime = Date.now();
+                frameCount = 0;
+
+                updateVideoStatus('streaming');
+
+                // Start sending frames to backend
+                await startBackendStreaming();
+
+                // Update stream duration
+                streamInterval = setInterval(updateStreamDuration, 1000);
+
+                console.log('Video stream started successfully');
+            } catch (error) {
+                console.error('Error starting video stream:', error);
+                alert('Failed to start video stream: ' + error.message);
+                updateVideoStatus('error');
+            }
+        }
+
+        // Stop video streaming
+        async function stopVideoStream() {
+            try {
+                console.log('Stopping video stream...');
+                
+                const videoPreview = document.getElementById('videoPreview');
+                const videoPlaceholder = document.getElementById('videoPlaceholder');
+                const startBtn = document.getElementById('startStreamBtn');
+                const stopBtn = document.getElementById('stopStreamBtn');
+
+                // Stop camera stream
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                    videoStream = null;
+                }
+
+                // Hide preview
+                videoPreview.style.display = 'none';
+                videoPlaceholder.style.display = 'flex';
+                videoPreview.srcObject = null;
+
+                // Stop backend streaming
+                await stopBackendStreaming();
+
+                // Update UI
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                isStreaming = false;
+
+                if (streamInterval) {
+                    clearInterval(streamInterval);
+                    streamInterval = null;
+                }
+
+                updateVideoStatus('idle');
+
+                console.log('Video stream stopped successfully');
+            } catch (error) {
+                console.error('Error stopping video stream:', error);
+                updateVideoStatus('error');
+            }
+        }
+
+        // Start backend streaming
+        async function startBackendStreaming() {
+            try {
+                const response = await fetch('/api/video/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        quality: document.getElementById('videoQuality').value,
+                        frameRate: parseInt(document.getElementById('frameRate').value)
+                    })
+                });
+
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to start backend streaming');
+                }
+
+                document.getElementById('vlcStatus').textContent = 'Starting...';
+                
+                // Start sending frames via WebSocket
+                startFrameCapture();
+            } catch (error) {
+                console.error('Failed to start backend streaming:', error);
+                throw error;
+            }
+        }
+
+        // Stop backend streaming
+        async function stopBackendStreaming() {
+            try {
+                const response = await fetch('/api/video/stop', {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('vlcStatus').textContent = 'Stopped';
+                }
+            } catch (error) {
+                console.error('Failed to stop backend streaming:', error);
+            }
+        }
+
+        // Start capturing and sending frames
+        function startFrameCapture() {
+            const videoPreview = document.getElementById('videoPreview');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const frameRate = parseInt(document.getElementById('frameRate').value);
+            const frameInterval = 1000 / frameRate;
+
+            canvas.width = videoPreview.videoWidth || 1280;
+            canvas.height = videoPreview.videoHeight || 720;
+
+            const captureFrame = () => {
+                if (!isStreaming || !videoStream) return;
+
+                try {
+                    // Draw current video frame to canvas
+                    ctx.drawImage(videoPreview, 0, 0, canvas.width, canvas.height);
+                    
+                    // Convert to blob and send
+                    canvas.toBlob(async (blob) => {
+                        if (blob && isStreaming) {
+                            await sendFrameToBackend(blob);
+                            frameCount++;
+                            document.getElementById('framesSent').textContent = frameCount;
+                        }
+                    }, 'image/jpeg', 0.8);
+
+                } catch (error) {
+                    console.error('Error capturing frame:', error);
+                }
+
+                if (isStreaming) {
+                    setTimeout(captureFrame, frameInterval);
+                }
+            };
+
+            // Wait for video to be ready
+            if (videoPreview.videoWidth > 0) {
+                canvas.width = videoPreview.videoWidth;
+                canvas.height = videoPreview.videoHeight;
+                captureFrame();
+            } else {
+                videoPreview.addEventListener('loadedmetadata', () => {
+                    canvas.width = videoPreview.videoWidth;
+                    canvas.height = videoPreview.videoHeight;
+                    captureFrame();
+                }, { once: true });
+            }
+        }
+
+        // Send frame to backend
+        async function sendFrameToBackend(frameBlob) {
+            try {
+                const formData = new FormData();
+                formData.append('frame', frameBlob);
+
+                const response = await fetch('/api/video/frame', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    console.warn('Failed to send frame to backend');
+                }
+            } catch (error) {
+                console.error('Error sending frame:', error);
+            }
+        }
+
+        // Update video status
+        function updateVideoStatus(status) {
+            const statusDot = document.getElementById('videoStatusDot');
+            const statusText = document.getElementById('videoStatusText');
+
+            statusDot.className = 'status-dot';
+            
+            switch (status) {
+                case 'idle':
+                    statusText.textContent = 'Status: Idle';
+                    break;
+                case 'streaming':
+                    statusText.textContent = 'Status: Streaming';
+                    statusDot.classList.add('streaming');
+                    break;
+                case 'error':
+                    statusText.textContent = 'Status: Error';
+                    break;
+            }
+        }
+
+        // Update stream duration
+        function updateStreamDuration() {
+            if (streamStartTime) {
+                const elapsed = Date.now() - streamStartTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                document.getElementById('streamDuration').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
         // Initialize file transfer when page loads
         document.addEventListener('DOMContentLoaded', () => {
             initFileTransfer();
+            initVideoStreaming();
         });
     </script>
 </body>

@@ -1,0 +1,185 @@
+#!/usr/bin/env node
+
+const net = require('net');
+const fs = require('fs');
+
+const VIDEO_SOCKET_PATH = '/tmp/video_socket';
+const VIDEO_PIPE_PATH = '/tmp/video_pipe';
+
+let server = null;
+let pipeStream = null;
+
+// Signal handler for clean shutdown
+process.on('SIGINT', () => {
+    console.log('\nShutting down Video Receiver...');
+    cleanup();
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    console.log('\nShutting down Video Receiver...');
+    cleanup();
+    process.exit(0);
+});
+
+// Cleanup function
+function cleanup() {
+    if (server) {
+        server.close();
+    }
+    if (pipeStream) {
+        pipeStream.end();
+    }
+    
+    try {
+        fs.unlinkSync(VIDEO_SOCKET_PATH);
+    } catch (err) {
+        // Ignore errors
+    }
+}
+
+// Create FIFO pipe if it doesn't exist
+function ensureVideoPipe() {
+    try {
+        const stats = fs.statSync(VIDEO_PIPE_PATH);
+        if (!stats.isFIFO()) {
+            fs.unlinkSync(VIDEO_PIPE_PATH);
+            require('child_process').execSync(`mkfifo ${VIDEO_PIPE_PATH}`);
+            console.log('Created video FIFO pipe:', VIDEO_PIPE_PATH);
+        } else {
+            console.log('Video FIFO pipe already exists:', VIDEO_PIPE_PATH);
+        }
+    } catch (err) {
+        // Pipe doesn't exist, create it
+        try {
+            require('child_process').execSync(`mkfifo ${VIDEO_PIPE_PATH}`);
+            console.log('Created video FIFO pipe:', VIDEO_PIPE_PATH);
+        } catch (createErr) {
+            console.error('Failed to create video pipe:', createErr.message);
+            process.exit(1);
+        }
+    }
+}
+
+// Handle video data from client
+function handleVideoData(client) {
+    console.log('Video client connected');
+    
+    let buffer = Buffer.alloc(0);
+    let expectedFrameLength = null;
+    let framesReceived = 0;
+
+    // Open pipe for writing (this will block until VLC opens it for reading)
+    if (!pipeStream) {
+        console.log('Opening video pipe for writing...');
+        try {
+            pipeStream = fs.createWriteStream(VIDEO_PIPE_PATH);
+            
+            pipeStream.on('error', (err) => {
+                console.error('Video pipe error:', err.message);
+                pipeStream = null;
+            });
+
+            pipeStream.on('close', () => {
+                console.log('Video pipe closed');
+                pipeStream = null;
+            });
+
+            console.log('Video pipe opened successfully');
+        } catch (err) {
+            console.error('Failed to open video pipe:', err.message);
+            client.end();
+            return;
+        }
+    }
+
+    client.on('data', (data) => {
+        buffer = Buffer.concat([buffer, data]);
+
+        // Process complete frames
+        while (buffer.length >= 4) {
+            if (expectedFrameLength === null) {
+                // Read frame length (uint32 big endian)
+                expectedFrameLength = buffer.readUInt32BE(0);
+                buffer = buffer.slice(4);
+                
+                if (expectedFrameLength > 10 * 1024 * 1024) { // 10MB limit
+                    console.error('Frame too large:', expectedFrameLength);
+                    client.end();
+                    return;
+                }
+            }
+
+            if (buffer.length >= expectedFrameLength) {
+                // Extract complete frame
+                const frameData = buffer.slice(0, expectedFrameLength);
+                buffer = buffer.slice(expectedFrameLength);
+                
+                // Write frame to pipe
+                if (pipeStream && !pipeStream.destroyed) {
+                    try {
+                        pipeStream.write(frameData);
+                        framesReceived++;
+                        
+                        if (framesReceived % 30 === 0) { // Log every 30 frames
+                            console.log(`Video frames received: ${framesReceived}`);
+                        }
+                    } catch (err) {
+                        console.error('Error writing to pipe:', err.message);
+                    }
+                }
+                
+                expectedFrameLength = null;
+            } else {
+                // Wait for more data
+                break;
+            }
+        }
+    });
+
+    client.on('end', () => {
+        console.log('Video client disconnected');
+        console.log(`Total frames received: ${framesReceived}`);
+    });
+
+    client.on('error', (err) => {
+        console.error('Client error:', err.message);
+    });
+}
+
+// Main function
+function main() {
+    console.log('Starting Video Receiver...');
+    
+    // Ensure video pipe exists
+    ensureVideoPipe();
+    
+    // Remove existing socket file
+    try {
+        fs.unlinkSync(VIDEO_SOCKET_PATH);
+    } catch (err) {
+        // Ignore if doesn't exist
+    }
+
+    // Create Unix Domain Socket server
+    server = net.createServer(handleVideoData);
+    
+    server.listen(VIDEO_SOCKET_PATH, () => {
+        console.log('Video Receiver listening on:', VIDEO_SOCKET_PATH);
+        console.log('Video pipe path:', VIDEO_PIPE_PATH);
+        console.log('Waiting for video frames...');
+        console.log('Start VLC with: vlc /tmp/video_pipe');
+    });
+
+    server.on('error', (err) => {
+        console.error('Server error:', err.message);
+        process.exit(1);
+    });
+}
+
+// Start the video receiver
+if (require.main === module) {
+    main();
+}
+
+module.exports = { main, cleanup };
