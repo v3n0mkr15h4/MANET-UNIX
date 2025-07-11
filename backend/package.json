@@ -4,7 +4,11 @@
   "description": "Backend server for message app with Unix Domain Socket communication",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "./start_c_servers.sh && node server.js",
+    "start-servers-only": "./start_c_servers.sh",
+    "start-backend-only": "node server.js",
+    "stop-servers": "./stop_c_servers.sh",
+    "build-c-servers": "cd ../c_application && make clean && make all",
     "dev": "nodemon server.js"
   },
   "dependencies": {
