@@ -52,7 +52,7 @@ stop_processes_by_name() {
 # Function to cleanup socket files
 cleanup_sockets() {
     print_status "Cleaning up socket files..."
-    rm -f /tmp/msg_socket /tmp/call_socket /tmp/file_socket
+    rm -f /tmp/msg_socket /tmp/call_socket /tmp/file_socket /tmp/video_socket
     print_success "Socket files cleaned up"
 }
 
@@ -64,6 +64,7 @@ main() {
     stop_processes_by_name "msg_server"
     stop_processes_by_name "call_server"
     stop_processes_by_name "file_server"
+    stop_processes_by_name "video_server"
     
     # Cleanup sockets
     cleanup_sockets

@@ -1130,6 +1130,128 @@
                 justify-content: center;
             }
         }
+        
+        /* Video Tab Styles */
+        .video-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .video-preview {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        #videoPreview {
+            border-radius: 8px;
+            background: #000;
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #ff8c42 0%, #ff7a28 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+        
+        .status-dot.streaming {
+            background: #28a745;
+        }
+        
+        .video-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .video-info p {
+            margin: 8px 0;
+            font-size: 14px;
+            color: #495057;
+        }
+        
+        .video-info strong {
+            color: #2c3e50;
+        }
+        
+        @media (max-width: 768px) {
+            .video-controls {
+                padding: 0 10px;
+            }
+            
+            .button-group {
+                width: 100%;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1450,11 +1572,47 @@
                 <div id="video" class="tab-pane">
                     <h2>Video Communication</h2>
                     <p>Real-time video streaming and conferencing capabilities for visual communication across the MANET network.</p>
-                    <div class="placeholder-content">
-                        <svg class="placeholder-icon" viewBox="0 0 24 24">
-                            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
-                        </svg>
-                        <p>This is the Video app interface - ready for implementation</p>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Video Streaming</h3>
+                            <div class="status-indicator">
+                                <span class="status-dot" id="videoStatusDot"></span>
+                                <span id="videoStatus">Status: Idle</span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="video-controls">
+                                <div class="video-preview">
+                                    <video id="videoPreview" autoplay muted playsinline style="width: 100%; max-width: 400px; border-radius: 8px; background: #000;"></video>
+                                    <div id="videoPlaceholder" class="placeholder-content">
+                                        <svg class="placeholder-icon" viewBox="0 0 24 24">
+                                            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                                        </svg>
+                                        <p>Click "Start Streaming" to begin video capture</p>
+                                    </div>
+                                </div>
+                                <div class="button-group">
+                                    <button class="btn btn-primary" id="startVideoBtn" onclick="startVideoStreaming()">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z"/>
+                                        </svg>
+                                        Start Streaming
+                                    </button>
+                                    <button class="btn btn-secondary" id="stopVideoBtn" onclick="stopVideoStreaming()" disabled>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M6 6h12v12H6z"/>
+                                        </svg>
+                                        Stop Streaming
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="video-info">
+                                <p><strong>Frame Rate:</strong> <span id="frameRate">0 fps</span></p>
+                                <p><strong>Frames Sent:</strong> <span id="framesSent">0</span></p>
+                                <p><strong>Last Frame Size:</strong> <span id="lastFrameSize">0 bytes</span></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1745,7 +1903,7 @@
                 callButton.classList.add('disabled');
                 callButton.innerHTML = `
                     <svg class="button-icon" viewBox="0 0 24 24">
-                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="#9e9e9e"/>
+                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="#9e9e9e"/>
                     </svg>
                     Select SDR Device
                 `;
@@ -1928,6 +2086,7 @@
             muteButton.innerHTML = `
                 <svg class="control-icon" viewBox="0 0 24 24">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                <svg class="control-icon" viewBox="0 0 24 24">
                     <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                 </svg>
                 Mute
@@ -2251,6 +2410,223 @@
         document.addEventListener('DOMContentLoaded', () => {
             initFileTransfer();
         });
+
+        // Video Streaming Functions
+        let videoStream = null;
+        let mediaRecorder = null;
+        let isStreaming = false;
+        let framesSent = 0;
+        let lastFrameTime = 0;
+        let frameRateCounter = 0;
+
+        async function startVideoStreaming() {
+            try {
+                console.log('Starting video streaming...');
+                updateVideoStatus('Connecting...', false);
+
+                // Start video streaming session on server
+                const startResponse = await fetch('/api/video/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const startResult = await startResponse.json();
+                if (!startResponse.ok || !startResult.success) {
+                    throw new Error(startResult.error || 'Failed to start video streaming');
+                }
+
+                // Get user media
+                videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        frameRate: { ideal: 15 }
+                    },
+                    audio: false
+                });
+
+                const videoPreview = document.getElementById('videoPreview');
+                videoPreview.srcObject = videoStream;
+                videoPreview.style.display = 'block';
+                document.getElementById('videoPlaceholder').style.display = 'none';
+
+                // Set up MediaRecorder for frame capture
+                mediaRecorder = new MediaRecorder(videoStream, {
+                    mimeType: 'video/webm;codecs=vp8',
+                    videoBitsPerSecond: 500000
+                });
+
+                const chunks = [];
+                mediaRecorder.ondataavailable = async (event) => {
+                    if (event.data.size > 0) {
+                        chunks.push(event.data);
+                        
+                        // Send frame to server
+                        const frameBlob = new Blob([event.data], { type: 'application/octet-stream' });
+                        await sendVideoFrame(frameBlob);
+                    }
+                };
+
+                mediaRecorder.start(100); // Record in 100ms chunks (10 fps)
+                isStreaming = true;
+                framesSent = 0;
+                
+                updateVideoStatus('Streaming', true);
+                updateVideoControls(true);
+                
+                // Start frame rate counter
+                setInterval(updateFrameRate, 1000);
+
+                console.log('Video streaming started successfully');
+            } catch (error) {
+                console.error('Error starting video streaming:', error);
+                showResult(`Failed to start video streaming: ${error.message}`, 'error');
+                updateVideoStatus('Error', false);
+                updateVideoControls(false);
+            }
+        }
+
+        async function stopVideoStreaming() {
+            try {
+                console.log('Stopping video streaming...');
+                updateVideoStatus('Stopping...', false);
+
+                isStreaming = false;
+
+                // Stop media recorder
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+
+                // Stop video stream
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                    videoStream = null;
+                }
+
+                // Reset video preview
+                const videoPreview = document.getElementById('videoPreview');
+                videoPreview.srcObject = null;
+                videoPreview.style.display = 'none';
+                document.getElementById('videoPlaceholder').style.display = 'flex';
+
+                // Stop streaming session on server
+                const stopResponse = await fetch('/api/video/stop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const stopResult = await stopResponse.json();
+                if (!stopResponse.ok || !stopResult.success) {
+                    console.warn('Failed to stop server streaming:', stopResult.error);
+                }
+
+                updateVideoStatus('Idle', false);
+                updateVideoControls(false);
+                
+                // Reset counters
+                framesSent = 0;
+                frameRateCounter = 0;
+                document.getElementById('framesSent').textContent = '0';
+                document.getElementById('frameRate').textContent = '0 fps';
+                document.getElementById('lastFrameSize').textContent = '0 bytes';
+
+                console.log('Video streaming stopped successfully');
+            } catch (error) {
+                console.error('Error stopping video streaming:', error);
+                showResult(`Failed to stop video streaming: ${error.message}`, 'error');
+                updateVideoStatus('Error', false);
+            }
+        }
+
+        async function sendVideoFrame(frameBlob) {
+            try {
+                const response = await fetch('/api/video/frame', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/octet-stream'
+                    },
+                    body: frameBlob
+                });
+
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    framesSent++;
+                    frameRateCounter++;
+                    document.getElementById('framesSent').textContent = framesSent;
+                    document.getElementById('lastFrameSize').textContent = formatFileSize(frameBlob.size);
+                    lastFrameTime = Date.now();
+                } else {
+                    console.error('Failed to send video frame:', result.error);
+                }
+            } catch (error) {
+                console.error('Error sending video frame:', error);
+            }
+        }
+
+        function updateVideoStatus(status, streaming) {
+            const statusElement = document.getElementById('videoStatus');
+            const statusDot = document.getElementById('videoStatusDot');
+            
+            statusElement.textContent = `Status: ${status}`;
+            
+            if (streaming) {
+                statusDot.classList.add('streaming');
+            } else {
+                statusDot.classList.remove('streaming');
+            }
+        }
+
+        function updateVideoControls(streaming) {
+            const startBtn = document.getElementById('startVideoBtn');
+            const stopBtn = document.getElementById('stopVideoBtn');
+            
+            startBtn.disabled = streaming;
+            stopBtn.disabled = !streaming;
+        }
+
+        function updateFrameRate() {
+            if (isStreaming) {
+                const frameRate = frameRateCounter;
+                document.getElementById('frameRate').textContent = `${frameRate} fps`;
+                frameRateCounter = 0;
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 bytes';
+            const k = 1024;
+            const sizes = ['bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Show result message function (if not already defined)
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result') || document.createElement('div');
+            resultDiv.id = 'result';
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+            
+            // Insert after the video controls if in video tab
+            const activeTab = document.querySelector('.tab-pane.active');
+            if (activeTab && activeTab.id === 'video') {
+                const cardContent = activeTab.querySelector('.card-content');
+                if (cardContent) {
+                    cardContent.appendChild(resultDiv);
+                }
+            }
+            
+            setTimeout(() => {
+                if (resultDiv.parentNode) {
+                    resultDiv.parentNode.removeChild(resultDiv);
+                }
+            }, 5000);
+        }
     </script>
 </body>
 </html>

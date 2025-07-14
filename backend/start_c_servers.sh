@@ -112,6 +112,8 @@ main() {
     sleep 1
     start_server_terminal "file_server" "$TERMINAL"
     sleep 1
+    start_server_terminal "video_server" "$TERMINAL"
+    sleep 1
     
     print_success "All C servers started in separate terminals"
     print_status "Starting Node.js backend server..."

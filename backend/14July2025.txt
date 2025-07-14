@@ -1,0 +1,16 @@
+1. NodeJSserver in python ONLY.
+2. review the files (onedrive)!
+3. open-ended programming for more flexibility and easy changing! -> files will be shared
+4. m&c - 
+        a. create a json table with fields (Name, Value) -> will be receives as parameters -> make it flexible (monitoring)
+        b. value field will be kept open (from the config file) -> checkbox, dropdown, or just empty field with all types of input
+        c. explanation will be provided my CoreEL Technologies later on. (2 -3 days).
+5. video Streaming 
+    a. check for video compression(it should not be on SDR), check for the data rate needed.
+    b. compression should be done externally, video will be sent through ethernet raw frames, and the external guy will compress and use vlc to play
+    c. good quality of service in lower order in high bandwith scenario
+    !!! run VLC on PC and stream it to SDR and it shouldd be seen on other SDR connected to other laptop !!! - final necessity
+
+    incoming video to be sent to SDR and the destination SDR should trigger VLC
+6. AUDIO:
+    - guy on laptop and pilot can talk, sent through SDR

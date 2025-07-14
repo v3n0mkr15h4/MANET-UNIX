@@ -6,6 +6,7 @@ const fs = require('fs');
 const MessageClient = require('./msg_client');
 const CallClient = require('./call_client');
 const FileClient = require('./file_client');
+const VideoClient = require('./video_client');
 
 const app = express();
 const PORT = 3000;
@@ -14,6 +15,7 @@ const PORT = 3000;
 const msgClient = new MessageClient();
 const callClient = new CallClient();
 const fileClient = new FileClient();
+const videoClient = new VideoClient();
 
 // Configure multer for file uploads
 const upload = multer({
@@ -241,6 +243,84 @@ app.delete('/api/files/clear', (req, res) => {
     }
 });
 
+// API endpoint to start video streaming
+app.post('/api/video/start', async (req, res) => {
+    try {
+        console.log('Starting video streaming...');
+        
+        // Connect to video server
+        await videoClient.connect();
+        
+        res.json({ 
+            success: true, 
+            message: 'Video streaming started successfully'
+        });
+    } catch (error) {
+        console.error('Error starting video streaming:', error.message);
+        res.status(500).json({ error: 'Failed to start video streaming: ' + error.message });
+    }
+});
+
+// API endpoint to stop video streaming
+app.post('/api/video/stop', async (req, res) => {
+    try {
+        console.log('Stopping video streaming...');
+        
+        videoClient.disconnect();
+        
+        res.json({ 
+            success: true, 
+            message: 'Video streaming stopped successfully'
+        });
+    } catch (error) {
+        console.error('Error stopping video streaming:', error.message);
+        res.status(500).json({ error: 'Failed to stop video streaming: ' + error.message });
+    }
+});
+
+// API endpoint to send video frame
+app.post('/api/video/frame', express.raw({type: 'application/octet-stream', limit: '10mb'}), async (req, res) => {
+    try {
+        if (!videoClient.isConnected()) {
+            return res.status(400).json({ error: 'Video streaming not started' });
+        }
+
+        const frameData = req.body;
+        if (!frameData || frameData.length === 0) {
+            return res.status(400).json({ error: 'No frame data received' });
+        }
+
+        await videoClient.sendFrame(frameData);
+        
+        res.json({ 
+            success: true, 
+            message: 'Frame sent successfully',
+            frameSize: frameData.length
+        });
+    } catch (error) {
+        console.error('Error sending video frame:', error.message);
+        res.status(500).json({ error: 'Failed to send video frame: ' + error.message });
+    }
+});
+
+// API endpoint to get video streaming status
+app.get('/api/video/status', (req, res) => {
+    try {
+        const status = {
+            isStreaming: videoClient.isConnected(),
+            timestamp: new Date().toISOString()
+        };
+        
+        res.json({ 
+            success: true, 
+            status: status
+        });
+    } catch (error) {
+        console.error('Error getting video status:', error.message);
+        res.status(500).json({ error: 'Failed to get video status: ' + error.message });
+    }
+});
+
 // Serve the new MANET dashboard as the main page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/manet-dashboard.html'));
@@ -252,4 +332,5 @@ app.listen(PORT, () => {
     console.log('  - Message Server: ./msg_server (listens on /tmp/msg_socket)');
     console.log('  - Call Server: ./call_server (listens on /tmp/call_socket)');
     console.log('  - File Server: ./file_server (listens on /tmp/file_socket)');
+    console.log('  - Video Server: ./video_server (listens on /tmp/video_socket)');
 });
